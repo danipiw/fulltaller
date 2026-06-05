@@ -20,3 +20,13 @@ opencode.json
 Captura de*.png
 hash_result.txt
 tmp_*.php
+
+# Databases & data files
+*.db
+*.xlsx
+
+# Git leftover dirs (from nested repos)
+modulos/ordenes/hooks/
+modulos/ordenes/info/
+modulos/ordenes/objects/
+modulos/ordenes/refs/
