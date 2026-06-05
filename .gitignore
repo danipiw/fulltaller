@@ -1,0 +1,22 @@
+﻿config_local.php
+*.log
+.DS_Store
+cloudflared.exe
+cloudflared.exe?
+config.yml
+AGENTS.md
+opencode.json
+
+# XAMPP
+/index.php
+/applications.html
+/bitnami.css
+/dashboard/
+/favicon.ico
+/img/
+/xampp/
+
+# Screenshots & temp files
+Captura de*.png
+hash_result.txt
+tmp_*.php
