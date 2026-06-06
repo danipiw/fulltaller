@@ -128,6 +128,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cobrar'])) {
             <button type="button" class="nav-btn" onclick="abrirModalMovimiento('egreso')">📤 Egreso</button>
             <span class="nav-sep">|</span>
             <a href="corte_caja.php" class="nav-btn">🔒 Corte</a>
+            <?php endif; ?>
         </div>
         <div class="nav-right">
             <span class="caja-monto-nav" style="margin-right:8px;">💰 $<?php echo number_format($saldo_caja, 2); ?></span>
