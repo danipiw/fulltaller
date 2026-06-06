@@ -89,17 +89,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cerrar'])) {
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <style>
-        .corte-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin:16px 0; }
-        .corte-item { background:var(--jb-fondo); padding:16px; border-radius:12px; text-align:center; }
-        .corte-item .label { font-size:0.85rem; color:#64748b; font-weight:600; text-transform:uppercase; }
-        .corte-item .valor { font-size:1.3rem; font-weight:700; margin-top:4px; }
-        .corte-total { background:var(--jb-azul-oscuro); color:white; padding:20px; border-radius:12px; text-align:center; margin:16px 0; }
-        .corte-total .label { font-size:0.9rem; opacity:0.85; }
-        .corte-total .valor { font-size:2rem; font-weight:700; }
-        .diferencia { margin-top:8px; font-size:1.1rem; font-weight:600; }
-        .diferencia.ok { color:var(--jb-success); }
-        .diferencia.error { color:#ef4444; }
-        .cierre-form { max-width:400px; margin:20px auto; }
+        .corte-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+        .corte-item { background:#f8faff; padding:10px; border-radius:8px; text-align:center; }
+        .corte-item .label { font-size:0.7rem; color:#64748b; font-weight:600; text-transform:uppercase; }
+        .corte-item .valor { font-size:1.1rem; font-weight:700; margin-top:2px; }
+        .corte-total { background:var(--jb-azul-oscuro); color:white; padding:12px; border-radius:8px; text-align:center; margin:8px 0; }
+        .corte-total .label { font-size:0.75rem; opacity:0.85; }
+        .corte-total .valor { font-size:1.5rem; font-weight:700; }
+        .corte-detalle { font-size:0.8rem; }
+        .corte-detalle table { width:100%; border-collapse:collapse; margin-top:4px; }
+        .corte-detalle td { padding:2px 6px; border-bottom:1px solid #e2e8f0; }
+        body.dark-mode .corte-item { background:#0f1729; }
+        body.dark-mode .corte-item .label { color:#94a3b8; }
+        body.dark-mode .corte-detalle td { border-bottom-color:#2d3748; color:#cbd5e1; }
+        .corte-scroll { flex:1; overflow-y:auto; min-height:0; padding-bottom:8px; }
+        .cierre-form { margin-top:8px; }
+        .cierre-form form input[type="number"] { font-size:1.2rem; text-align:center; padding:10px; border:2px solid var(--jb-azul); border-radius:8px; }
+        .cierre-form form input[type="number"] { font-size:1.2rem; text-align:center; padding:10px; border:2px solid var(--jb-azul); border-radius:8px; }
+        .cierre-form .form-group { margin-bottom:4px; }
+        @media (max-width:480px) {
+            .corte-grid { grid-template-columns:1fr 1fr; gap:6px; }
+            .corte-item { padding:8px; }
+            .corte-item .valor { font-size:0.95rem; }
+            .corte-total .valor { font-size:1.2rem; }
+        }
     </style>
 </head>
 <body>
@@ -139,13 +152,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cerrar'])) {
     </div>
 </nav>
 
-<div class="pos-wrapper">
-    <div class="page-header">
-        <h1>🧾 Corte de Caja</h1>
-        <p style="color:#64748b;">
-            <?php echo htmlspecialchars($_SESSION['nombre']); ?> — <?php echo date('d/m/Y'); ?>
-        </p>
+<div class="pos-wrapper" style="display:flex;flex-direction:column;height:calc(100vh - 56px);overflow:hidden;padding-bottom:0;">
+    <div style="flex-shrink:0;">
+        <div class="page-header">
+            <h1 style="margin:0;">🧾 Corte de Caja</h1>
+            <p style="color:#64748b;margin:2px 0 0 0;font-size:0.85rem;">
+                <?php echo htmlspecialchars($_SESSION['nombre']); ?> — <?php echo date('d/m/Y'); ?>
+            </p>
+        </div>
     </div>
+
+    <div class="corte-scroll">
 
     <?php if ($success): ?>
     <div class="alert success"><?php echo $success; ?></div>
@@ -279,10 +296,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cerrar'])) {
             <div class="form-group">
                 <label>Dinero físico en la caja ($)</label>
                 <input type="number" name="monto_cierre" step="0.01" min="0" required autofocus
-                    value="<?php echo $saldo_esperado; ?>"
-                    style="font-size:1.5rem;text-align:center;padding:16px;border:2px solid var(--jb-azul);border-radius:12px;width:100%;">
+                    value="<?php echo $saldo_esperado; ?>">
             </div>
-            <button type="submit" name="cerrar" value="1" class="btn-guardar" style="width:100%;padding:16px;font-size:1.1rem;margin-top:8px;"
+            <button type="submit" name="cerrar" value="1" class="btn-guardar" style="width:100%;margin-top:8px;"
                 onclick="return confirm('¿Estás seguro de cerrar la caja?')">
                 🔒 Cerrar Caja
             </button>
@@ -290,6 +306,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cerrar'])) {
         </form>
     </div>
     <?php endif; ?>
+    </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>

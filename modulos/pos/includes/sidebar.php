@@ -43,10 +43,12 @@
 
             <hr class="sidebar-divider">
 
-            <a href="configuracion.php" class="sidebar-menu-item" data-bs-dismiss="offcanvas">
+            <?php if (esAdminPOS()): ?>
+            <a href="configuracion.php" class="sidebar-menu-item">
                 <i class="bi bi-gear"></i>
                 <span>Configuración</span>
             </a>
+            <?php endif; ?>
         </div>
 
         <div style="flex:1;"></div>
