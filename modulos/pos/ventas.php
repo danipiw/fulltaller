@@ -229,8 +229,9 @@ $cajeros = $db->query("SELECT id, nombre FROM usuarios WHERE activo=1 ORDER BY n
                     <td>
                         <div style="display:flex;gap:4px;">
                         <?php if (!$anulada): ?>
-                        <a href="comprobante.php?venta_id=<?php echo $v['id']; ?>" class="btn-edit btn-sm" style="text-decoration:none;font-size:0.75rem;" onclick="event.stopPropagation();">🧾 Comprobante</a>
-                        <button type="button" class="btn-delete btn-sm" onclick="event.stopPropagation();anularVenta(<?php echo $v['id']; ?>)">❌ Anular</button>
+                        <a href="ticket.php?id=<?php echo $v['id']; ?>" class="btn-primary btn-sm" style="text-decoration:none;font-size:0.75rem;padding:4px 8px;" onclick="event.stopPropagation();" target="_blank">🖨️ Ticket</a>
+                        <a href="comprobante.php?venta_id=<?php echo $v['id']; ?>" class="btn-edit btn-sm" style="text-decoration:none;font-size:0.75rem;padding:4px 8px;" onclick="event.stopPropagation();">🧾 Comprobante</a>
+                        <button type="button" class="btn-delete btn-sm" style="padding:4px 8px;font-size:0.75rem;" onclick="event.stopPropagation();anularVenta(<?php echo $v['id']; ?>)">❌ Anular</button>
                         <?php endif; ?>
                         </div>
                     </td>
