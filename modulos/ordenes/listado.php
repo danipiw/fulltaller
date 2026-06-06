@@ -110,6 +110,10 @@ function badgeClass($estado) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Órdenes - <?php echo $ES_TECNICO ? 'Técnico' : 'Recepción'; ?></title>
+    <link rel="manifest" href="../../manifest.php">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="apple-touch-icon" href="icon.php?size=192">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <style>
@@ -784,6 +788,7 @@ function badgeClass($estado) {
         .nav-logo { height:53px; width:auto; }
         @media (max-width:767.98px) { .nav-logo { height:42px; } }
     </style>
+<script>if('serviceWorker'in navigator){navigator.serviceWorker.register('../../sw.js').catch(function(){})}</script>
 </head>
 <body>
 
