@@ -925,6 +925,8 @@ body:has(.pos-full) { overflow: hidden; }
     .cart-header-row h2 { font-size: 1rem; }
     .panel { padding: 10px; }
     .alert { font-size: 0.8rem; padding: 10px 12px; }
+    .pos-wrapper { height: calc(100vh - 56px); overflow-y: auto; }
+    html, body { height: 100%; overflow: hidden; }
 }
 
 /* ===== BOTÓN ELIMINAR ITEM ===== */
@@ -1203,3 +1205,12 @@ body.dark-mode .text-muted { color: #94a3b8 !important; }
 body.dark-mode code { background: #1a2235; color: #e2e8f0; border: 1px solid #2d3748; }
 body.dark-mode .data-table tfoot tr { background: #1a2235 !important; }
 body.dark-mode .data-table tfoot td { color: #e2e8f0 !important; }
+body.dark-mode .data-table { background: #0f1729 !important; }
+body.dark-mode .table-wrapper { background: #0f1729 !important; }
+body.dark-mode .ie-box { background: #1a2235 !important; color: #e2e8f0; }
+body.dark-mode .pago-select { background: #0f1729 !important; color: #e2e8f0; border-color: #2d3748; }
+body.dark-mode .page-header nav a { background: #1a2235 !important; border-color: #2d3748; color: #cbd5e1; }
+body.dark-mode .page-header nav a:hover { background: var(--jb-azul) !important; color: white; }
+body.dark-mode .page-header nav a.active { background: var(--jb-navy) !important; color: white; }
+body.dark-mode .detalle-row .label { color: #94a3b8; }
+body.dark-mode .detalle-row .value { color: #e2e8f0; }
