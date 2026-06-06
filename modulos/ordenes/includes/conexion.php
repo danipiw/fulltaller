@@ -58,7 +58,7 @@ if (!$taller['activo']) {
 }
 
 if (!$taller['suscripcion_activa'] || strtotime($taller['fecha_vencimiento']) < strtotime(date('Y-m-d'))) {
-    header('Location: ../../suscripcion_vencida.php');
+    header('Location: ../../../suscripcion_vencida.php');
     exit;
 }
 

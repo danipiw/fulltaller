@@ -1,6 +1,6 @@
 <?php
 session_start();
-include 'conexion.php';
+include __DIR__ . '/../modulos/ordenes/includes/conexion.php';
 
 $BASE = rtrim(dirname(dirname($_SERVER['SCRIPT_NAME'])), '/\\');
 
