@@ -20,7 +20,7 @@ if (!function_exists('imagecreatefrompng')) {
 
 $etag = '"' . md5_file($src) . '-' . $size . '"';
 header('ETag: ' . $etag);
-header('Cache-Control: public, max-age=86400');
+header('Cache-Control: public, max-age=3600');
 
 if (isset($_SERVER['HTTP_IF_NONE_MATCH']) && trim($_SERVER['HTTP_IF_NONE_MATCH']) === $etag) {
     http_response_code(304);

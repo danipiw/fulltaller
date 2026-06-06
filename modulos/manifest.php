@@ -25,6 +25,7 @@ if (!empty($subdominio)) {
 }
 
 $base = 'ordenes';
+$iconV = filemtime(__DIR__ . '/ordenes/logocel.png');
 echo json_encode([
     'name' => $nombre,
     'short_name' => function_exists('mb_substr') ? mb_substr($nombre, 0, 12) : substr($nombre, 0, 12),
@@ -34,7 +35,7 @@ echo json_encode([
     'background_color' => '#001845',
     'theme_color' => '#001845',
     'icons' => [
-        ['src' => $base . '/icon.php?size=192', 'sizes' => '192x192', 'type' => 'image/png'],
-        ['src' => $base . '/icon.php?size=512', 'sizes' => '512x512', 'type' => 'image/png', 'purpose' => 'any maskable']
+        ['src' => $base . '/icon.php?size=192&v=' . $iconV, 'sizes' => '192x192', 'type' => 'image/png'],
+        ['src' => $base . '/icon.php?size=512&v=' . $iconV, 'sizes' => '512x512', 'type' => 'image/png', 'purpose' => 'any maskable']
     ]
 ], JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
