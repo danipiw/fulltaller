@@ -927,6 +927,10 @@ body:has(.pos-full) { overflow: hidden; }
     .alert { font-size: 0.8rem; padding: 10px 12px; }
     .pos-wrapper { height: calc(100vh - 56px); overflow-y: auto; }
     html, body { height: 100%; overflow: hidden; }
+    .carrito-items { max-height: calc(100vh - 300px) !important; }
+    .nav-center.d-none { display: flex !important; flex-wrap: wrap; justify-content: flex-start; }
+    .nav-jb .nav-btn { font-size: 0.7rem; padding: 0.25rem 0.4rem; }
+    .nav-jb .nav-sep { margin: 0 0.15rem; }
 }
 
 /* ===== BOTÓN ELIMINAR ITEM ===== */

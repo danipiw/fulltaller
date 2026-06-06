@@ -119,16 +119,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cobrar'])) {
                 <span class="nav-brand-text" style="color:white;font-size:0.95rem;font-weight:500;">Punto de venta</span>
             </a>
         </div>
-        <div class="nav-center d-none d-md-flex" style="align-items:center;">
+        <div class="nav-center d-flex" style="align-items:center;">
             <a href="index.php" class="nav-btn active">🛒 Vender</a>
-            <?php if (esAdminPOS()): ?>
             <span class="nav-sep">|</span>
             <button type="button" class="nav-btn" onclick="abrirModalMovimiento('ingreso')">📥 Ingreso</button>
             <span class="nav-sep">|</span>
             <button type="button" class="nav-btn" onclick="abrirModalMovimiento('egreso')">📤 Egreso</button>
             <span class="nav-sep">|</span>
             <a href="corte_caja.php" class="nav-btn">🔒 Corte</a>
-            <?php endif; ?>
         </div>
         <div class="nav-right">
             <span class="caja-monto-nav" style="margin-right:8px;">💰 $<?php echo number_format($saldo_caja, 2); ?></span>
