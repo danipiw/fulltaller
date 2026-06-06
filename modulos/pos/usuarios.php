@@ -80,11 +80,7 @@ $usuarios_lista = $db->query('SELECT id, nombre, usuario, rol, modulos, activo, 
         <div class="nav-center d-none d-md-flex" style="align-items:center;">
             <a href="index.php" class="nav-btn">🛒 Vender</a>
             <span class="nav-sep">|</span>
-            <a href="productos.php" class="nav-btn">📦 Productos</a>
-            <span class="nav-sep">|</span>
             <a href="usuarios.php" class="nav-btn active">👥 Usuarios</a>
-            <span class="nav-sep">|</span>
-            <a href="ventas.php" class="nav-btn">📊 Historial</a>
             <span class="nav-sep">|</span>
             <a href="index.php" class="nav-btn">📥 Ingreso</a>
             <span class="nav-sep">|</span>

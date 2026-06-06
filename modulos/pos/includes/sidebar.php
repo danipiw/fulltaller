@@ -26,9 +26,19 @@
                 <span>Productos</span>
             </a>
 
+            <a href="ventas.php" class="sidebar-menu-item">
+                <i class="bi bi-receipt"></i>
+                <span>Registro de Ventas</span>
+            </a>
+
             <a href="clientes.php" class="sidebar-menu-item">
                 <i class="bi bi-people"></i>
                 <span>Clientes</span>
+            </a>
+
+            <a href="comprobante.php" class="sidebar-menu-item">
+                <i class="bi bi-file-earmark-text"></i>
+                <span>Comprobante</span>
             </a>
 
             <hr class="sidebar-divider">

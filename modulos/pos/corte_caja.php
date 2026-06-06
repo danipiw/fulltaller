@@ -119,23 +119,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cerrar'])) {
         </div>
         <div class="nav-center d-none d-md-flex" style="align-items:center;">
             <a href="index.php" class="nav-btn">🛒 Vender</a>
-            <span class="nav-sep">|</span>
-            <a href="productos.php" class="nav-btn">📦 Productos</a>
             <?php if (esAdminPOS()): ?>
             <span class="nav-sep">|</span>
             <a href="usuarios.php" class="nav-btn">👥 Usuarios</a>
             <?php endif; ?>
             <span class="nav-sep">|</span>
-            <a href="ventas.php" class="nav-btn">📊 Historial</a>
-            <span class="nav-sep">|</span>
             <a href="index.php" class="nav-btn">📥 Ingreso</a>
             <span class="nav-sep">|</span>
             <a href="index.php" class="nav-btn">📤 Egreso</a>
             <span class="nav-sep">|</span>
-            <a href="corte_caja.php" class="nav-btn active">🔒 Corte</a>
+            <a href="corte_caja.php" class="nav-btn">🔒 Corte</a>
         </div>
         <div class="nav-right">
-            <span class="rol-badge">
+            <span class="rol-badge" style="margin-right:6px;">
                 <?php echo esAdminPOS() ? '👑' : '👤'; ?>
                 <?php echo htmlspecialchars($_SESSION['nombre']); ?>
             </span>

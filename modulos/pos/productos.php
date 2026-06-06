@@ -218,14 +218,10 @@ $productos = $db->query("SELECT * FROM pos_productos WHERE activo=1 $where_busqu
         </div>
         <div class="nav-center d-none d-md-flex" style="align-items:center;">
             <a href="index.php" class="nav-btn">🛒 Vender</a>
-            <span class="nav-sep">|</span>
-            <a href="productos.php" class="nav-btn active">📦 Productos</a>
             <?php if (esAdminPOS()): ?>
             <span class="nav-sep">|</span>
             <a href="usuarios.php" class="nav-btn">👥 Usuarios</a>
             <?php endif; ?>
-            <span class="nav-sep">|</span>
-            <a href="ventas.php" class="nav-btn">📊 Historial</a>
             <span class="nav-sep">|</span>
             <a href="index.php" class="nav-btn">📥 Ingreso</a>
             <span class="nav-sep">|</span>

@@ -91,7 +91,7 @@ $cajeros = $db->query("SELECT id, nombre FROM usuarios WHERE activo=1 ORDER BY n
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Historial - POS FullTaller</title>
+    <title>Registro de Ventas - POS FullTaller</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
@@ -113,14 +113,10 @@ $cajeros = $db->query("SELECT id, nombre FROM usuarios WHERE activo=1 ORDER BY n
         </div>
         <div class="nav-center d-none d-md-flex" style="align-items:center;">
             <a href="index.php" class="nav-btn">🛒 Vender</a>
-            <span class="nav-sep">|</span>
-            <a href="productos.php" class="nav-btn">📦 Productos</a>
             <?php if (esAdminPOS()): ?>
             <span class="nav-sep">|</span>
             <a href="usuarios.php" class="nav-btn">👥 Usuarios</a>
             <?php endif; ?>
-            <span class="nav-sep">|</span>
-            <a href="ventas.php" class="nav-btn active">📊 Historial</a>
             <span class="nav-sep">|</span>
             <a href="index.php" class="nav-btn">📥 Ingreso</a>
             <span class="nav-sep">|</span>
@@ -140,7 +136,7 @@ $cajeros = $db->query("SELECT id, nombre FROM usuarios WHERE activo=1 ORDER BY n
 
 <div class="pos-wrapper">
     <div class="page-header">
-        <h1>📊 Historial de Ventas</h1>
+        <h1>📊 Registro de Ventas</h1>
     </div>
 
     <div class="panel filtros-panel">
@@ -231,9 +227,12 @@ $cajeros = $db->query("SELECT id, nombre FROM usuarios WHERE activo=1 ORDER BY n
                         ?>
                     </td>
                     <td>
+                        <div style="display:flex;gap:4px;">
                         <?php if (!$anulada): ?>
+                        <a href="comprobante.php?venta_id=<?php echo $v['id']; ?>" class="btn-edit btn-sm" style="text-decoration:none;font-size:0.75rem;" onclick="event.stopPropagation();">🧾 Comprobante</a>
                         <button type="button" class="btn-delete btn-sm" onclick="event.stopPropagation();anularVenta(<?php echo $v['id']; ?>)">❌ Anular</button>
                         <?php endif; ?>
+                        </div>
                     </td>
                 </tr>
                 <?php endwhile; ?>

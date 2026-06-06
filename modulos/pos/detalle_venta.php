@@ -58,14 +58,10 @@ $metodo_icono = ['efectivo' => '💵', 'tarjeta' => '💳', 'transferencia' => '
         </div>
         <div class="nav-center d-none d-md-flex" style="align-items:center;">
             <a href="index.php" class="nav-btn">🛒 Vender</a>
-            <span class="nav-sep">|</span>
-            <a href="productos.php" class="nav-btn">📦 Productos</a>
             <?php if (esAdminPOS()): ?>
             <span class="nav-sep">|</span>
             <a href="usuarios.php" class="nav-btn">👥 Usuarios</a>
             <?php endif; ?>
-            <span class="nav-sep">|</span>
-            <a href="ventas.php" class="nav-btn">📊 Historial</a>
             <span class="nav-sep">|</span>
             <a href="index.php" class="nav-btn">📥 Ingreso</a>
             <span class="nav-sep">|</span>
@@ -150,6 +146,7 @@ $metodo_icono = ['efectivo' => '💵', 'tarjeta' => '💳', 'transferencia' => '
 
     <div style="display:flex;gap:8px;margin-top:16px;">
         <a href="ticket.php?id=<?php echo $id; ?>" class="btn-primary" target="_blank">🖨️ Imprimir ticket</a>
+        <a href="comprobante.php?venta_id=<?php echo $id; ?>" class="btn-primary" style="background:linear-gradient(135deg,#001845,#023e8a);">🧾 Comprobante</a>
         <a href="ventas.php" class="btn-cancelar">← Volver al historial</a>
     </div>
 

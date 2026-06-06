@@ -19,12 +19,29 @@ if ($r) {
 
 $mensaje = '';
 $error = '';
+
+$logo_uploaded = false;
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    if (isset($_FILES['logo_comprobante_file']) && $_FILES['logo_comprobante_file']['tmp_name']) {
+        $ext = strtolower(pathinfo($_FILES['logo_comprobante_file']['name'], PATHINFO_EXTENSION));
+        if (in_array($ext, ['png', 'jpg', 'jpeg', 'gif', 'webp'])) {
+            $dest = __DIR__ . '/logo_comprobante.png';
+            if (move_uploaded_file($_FILES['logo_comprobante_file']['tmp_name'], $dest)) {
+                $logo_uploaded = true;
+            } else {
+                $error = 'Error al subir el logo.';
+            }
+        } else {
+            $error = 'Formato de imagen no válido (solo PNG, JPG, GIF, WebP).';
+        }
+    }
+
     $fields = [
         'taller_nombre', 'taller_direccion', 'taller_telefono',
         'legal_terminos', 'estados_recepcion', 'estados_tecnico',
         'admin_nombre', 'admin_telefono',
-        'tipo_impresion'
+        'tipo_impresion',
+        'logo_comprobante'
     ];
     foreach ($fields as $field) {
         $val = $db->real_escape_string($_POST[$field] ?? '');
@@ -34,9 +51,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $error = 'Error al guardar: ' . $db->error;
     } else {
         $mensaje = 'Configuración guardada correctamente.';
+        if ($logo_uploaded) $mensaje .= ' Logo subido correctamente.';
         foreach ($fields as $field) {
             $config[$field] = $_POST[$field] ?? '';
         }
+        if ($logo_uploaded) $config['logo_comprobante'] = '1';
     }
 }
 $db->close();
@@ -77,14 +96,10 @@ $db->close();
         </div>
         <div class="nav-center d-none d-md-flex" style="align-items:center;">
             <a href="index.php" class="nav-btn">🛒 Vender</a>
-            <span class="nav-sep">|</span>
-            <a href="productos.php" class="nav-btn">📦 Productos</a>
             <?php if (esAdminPOS()): ?>
             <span class="nav-sep">|</span>
             <a href="usuarios.php" class="nav-btn">👥 Usuarios</a>
             <?php endif; ?>
-            <span class="nav-sep">|</span>
-            <a href="ventas.php" class="nav-btn">📊 Historial</a>
             <span class="nav-sep">|</span>
             <a href="index.php" class="nav-btn">📥 Ingreso</a>
             <span class="nav-sep">|</span>
@@ -111,7 +126,7 @@ $db->close();
     <div class="alert alert-danger py-2" style="font-size:0.9rem;"><?php echo $error; ?></div>
     <?php endif; ?>
 
-    <form method="POST">
+    <form method="POST" enctype="multipart/form-data">
 
         <div class="card card-config mb-3">
             <div class="card-body">
@@ -134,6 +149,20 @@ $db->close();
                 <h5><i class="bi bi-telephone"></i> Teléfono del Taller</h5>
                 <p class="text-muted small">Aparecerá en las órdenes impresas.</p>
                 <input type="text" name="taller_telefono" class="form-control" value="<?php echo htmlspecialchars($config['taller_telefono'] ?? ''); ?>">
+            </div>
+        </div>
+
+        <div class="card card-config mb-3">
+            <div class="card-body">
+                <h5><i class="bi bi-image"></i> Logo para Comprobantes</h5>
+                <p class="text-muted small">Subí un logo que aparecerá en el encabezado de los comprobantes (PNG, JPG, GIF o WebP).</p>
+                <?php if (!empty($config['logo_comprobante']) && file_exists(__DIR__ . '/logo_comprobante.png')): ?>
+                <div style="margin-bottom:12px;">
+                    <img src="logo_comprobante.png?v=<?php echo filemtime(__DIR__ . '/logo_comprobante.png'); ?>" style="max-height:80px;border-radius:8px;border:1px solid #e2e8f0;padding:4px;background:white;">
+                </div>
+                <?php endif; ?>
+                <input type="file" name="logo_comprobante_file" accept="image/png,image/jpeg,image/gif,image/webp" class="form-control">
+                <div class="form-text">Formatos permitidos: PNG, JPG, GIF, WebP. Se redimensionará automáticamente.</div>
             </div>
         </div>
 
