@@ -43,10 +43,10 @@ if (isset($_GET['error'])) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title><?php echo $taller_nombre_login; ?> - Inicio de Sesión</title>
-    <link rel="manifest" href="/manifest.php">
+    <link rel="manifest" href="modulos/manifest.php">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <link rel="apple-touch-icon" href="/modulos/ordenes/icon.php?size=192">
+    <link rel="apple-touch-icon" href="modulos/ordenes/icon.php?size=192">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <style>
@@ -165,7 +165,7 @@ if (isset($_GET['error'])) {
             .btn-login { padding: 14px; font-size: 1.1rem; }
         }
     </style>
-<script>if('serviceWorker'in navigator){navigator.serviceWorker.register('/sw.js').catch(function(){})}</script>
+<script>if('serviceWorker'in navigator){navigator.serviceWorker.register('modulos/sw.js').catch(function(){})}</script>
 </head>
 <body>
 

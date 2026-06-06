@@ -24,12 +24,12 @@ if (!empty($subdominio)) {
     }
 }
 
-$base = '/modulos/ordenes';
+$base = 'ordenes';
 echo json_encode([
     'name' => $nombre,
     'short_name' => function_exists('mb_substr') ? mb_substr($nombre, 0, 12) : substr($nombre, 0, 12),
     'description' => 'Punto de venta y gestión de talleres',
-    'start_url' => '/login.php',
+    'start_url' => 'login.php',
     'display' => 'standalone',
     'background_color' => '#001845',
     'theme_color' => '#001845',
