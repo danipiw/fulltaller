@@ -21,7 +21,7 @@ $estados_seleccionados = [];
 $todos_estados = obtenerTodosEstados($conn);
 $estados_cambiables_recepcion = obtenerEstadosRecepcion($conn);
 $estados_cambiables_tecnico = obtenerEstadosTecnico($conn);
-if ($ES_FULL) {
+if ($ES_FULL || $ES_ADMIN) {
     $estados_cambiables = array_values(array_unique(array_merge($estados_cambiables_recepcion, $estados_cambiables_tecnico)));
 } elseif ($ES_RECEPCION) {
     $estados_cambiables = $estados_cambiables_recepcion;

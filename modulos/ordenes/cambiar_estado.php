@@ -12,6 +12,7 @@ if (!isset($_SESSION['rol'])) {
 
 $rol_actual = $_SESSION['rol'];
 $es_full = ($rol_actual === 'full');
+$es_admin = ($rol_actual === 'admin');
 
 // Verificar que lleguen los datos necesarios
 if (!isset($_POST['id']) || !is_numeric($_POST['id']) || !isset($_POST['estado'])) {
@@ -40,15 +41,7 @@ if (!in_array($estado, $estados_permitidos)) {
 $estados_recepcion = array_merge(obtenerEstadosRecepcion($conn), ['ENTREGADO']);
 $estados_tecnico = obtenerEstadosTecnico($conn);
 
-if ($rol_actual === 'recepcion' && !in_array($estado, $estados_recepcion)) {
-    echo json_encode([
-        'success' => false,
-        'error' => 'No tienes permiso para cambiar a este estado'
-    ]);
-    exit;
-}
-
-if (!$es_full) {
+if (!$es_full && !$es_admin) {
     if ($rol_actual === 'recepcion' && !in_array($estado, $estados_recepcion)) {
         echo json_encode([
             'success' => false,
@@ -88,11 +81,13 @@ if ($stmt->execute()) {
     $titulo = 'Estado actualizado - Orden #' . $id;
     $notif_ok = false;
 
-    if ($es_full) {
-        $mensaje_notif = 'Full cambió el estado a: ' . $estado;
+    if ($es_full || $es_admin) {
+        $notif_rol = $es_admin ? 'admin' : 'full';
+        $notif_nombre = $es_admin ? 'Admin' : 'Full';
+        $mensaje_notif = $notif_nombre . ' cambió el estado a: ' . $estado;
         foreach (['recepcion', 'tecnico'] as $destino) {
-            $stmt_n = $conn->prepare("INSERT INTO notificaciones (orden_id, desde_rol, para_rol, titulo, mensaje, leida) VALUES (?, 'full', ?, ?, ?, 0)");
-            $stmt_n->bind_param("isss", $id, $destino, $titulo, $mensaje_notif);
+            $stmt_n = $conn->prepare("INSERT INTO notificaciones (orden_id, desde_rol, para_rol, titulo, mensaje, leida) VALUES (?, ?, ?, ?, ?, 0)");
+            $stmt_n->bind_param("issss", $id, $notif_rol, $destino, $titulo, $mensaje_notif);
             $notif_ok = $stmt_n->execute();
             $stmt_n->close();
         }
