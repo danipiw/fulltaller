@@ -220,7 +220,7 @@ $cajeros = $db->query("SELECT id, nombre FROM usuarios WHERE activo=1 ORDER BY n
                         ?>
                     </td>
                     <td class="text-end">
-                        <div style="display:flex;gap:4px;">
+                        <div style="display:flex;gap:4px;justify-content:flex-end;">
                         <?php if (!$anulada): ?>
                         <a href="ticket.php?id=<?php echo $v['id']; ?>" class="btn-primary btn-sm" style="text-decoration:none;font-size:0.75rem;padding:4px 8px;" onclick="event.stopPropagation();" target="_blank">🖨️ Ticket</a>
                         <a href="comprobante.php?venta_id=<?php echo $v['id']; ?>" class="btn-edit btn-sm" style="text-decoration:none;font-size:0.75rem;padding:4px 8px;" onclick="event.stopPropagation();">🧾 Comprobante</a>

@@ -89,33 +89,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cerrar'])) {
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <style>
-        .corte-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
-        .corte-item { background:#f8faff; padding:10px; border-radius:8px; text-align:center; }
-        .corte-item .label { font-size:0.7rem; color:#64748b; font-weight:600; text-transform:uppercase; }
-        .corte-item .valor { font-size:1.1rem; font-weight:700; margin-top:2px; }
-        .corte-total { background:var(--jb-azul-oscuro); color:white; padding:12px; border-radius:8px; text-align:center; margin:8px 0; }
-        .corte-total .label { font-size:0.75rem; opacity:0.85; }
-        .corte-total .valor { font-size:1.5rem; font-weight:700; }
-        .corte-detalle { font-size:0.8rem; }
-        .corte-detalle table { width:100%; border-collapse:collapse; margin-top:4px; }
-        .corte-detalle td { padding:2px 6px; border-bottom:1px solid #e2e8f0; }
+        .corte-grid { display:grid; grid-template-columns:1fr 1fr; gap:6px; }
+        .corte-item { background:#f8faff; padding:8px; border-radius:8px; text-align:center; }
+        .corte-item .label { font-size:0.65rem; color:#64748b; font-weight:600; text-transform:uppercase; }
+        .corte-item .valor { font-size:1rem; font-weight:700; margin-top:1px; }
+        .corte-total { background:var(--jb-azul-oscuro); color:white; padding:10px; border-radius:8px; text-align:center; margin:6px 0; }
+        .corte-total .label { font-size:0.7rem; opacity:0.85; }
+        .corte-total .valor { font-size:1.3rem; font-weight:700; }
+        .corte-detalle { font-size:0.75rem; }
+        .corte-detalle table { width:100%; border-collapse:collapse; margin-top:2px; }
+        .corte-detalle td { padding:1px 6px; border-bottom:1px solid #e2e8f0; }
         body.dark-mode .corte-item { background:#0f1729; }
         body.dark-mode .corte-item .label { color:#94a3b8; }
         body.dark-mode .corte-detalle td { border-bottom-color:#2d3748; color:#cbd5e1; }
         .corte-scroll { flex:1; overflow-y:auto; min-height:0; }
-        .corte-scroll .panel { padding:10px 12px; margin-bottom:6px; }
+        .corte-scroll .panel { padding:8px 10px; margin-bottom:4px; }
         .corte-scroll .panel:last-child { margin-bottom:0; }
-        .corte-scroll .panel h2 { font-size:1rem; margin-bottom:8px; }
-        .cierre-form { margin-top:6px; max-width:400px; margin-left:auto; margin-right:auto; }
-        .cierre-form .panel-content { display:flex; flex-direction:column; align-items:center; }
-        .cierre-form form { width:100%; }
-        .cierre-form form input[type="number"] { font-size:1.2rem; text-align:center; padding:10px; border:2px solid var(--jb-azul); border-radius:8px; }
-        .cierre-form .form-group { margin-bottom:4px; }
+        .corte-scroll .panel h2 { font-size:0.9rem; margin:0 0 6px 0; }
+        .corte-scroll .panel p { margin-bottom:6px !important; }
+        .page-header { margin-bottom:8px; }
+        .cierre-form { margin-top:4px; max-width:400px; margin-left:auto; margin-right:auto; }
+        .cierre-form form input[type="number"] { font-size:1.1rem; text-align:center; padding:8px; border:2px solid var(--jb-azul); border-radius:8px; }
+        .cierre-form .form-group { margin-bottom:2px; }
+        .cierre-form form .btn-guardar { padding:8px 16px; font-size:0.85rem; }
         @media (max-width:480px) {
-            .corte-grid { grid-template-columns:1fr 1fr; gap:6px; }
-            .corte-item { padding:8px; }
-            .corte-item .valor { font-size:0.95rem; }
-            .corte-total .valor { font-size:1.2rem; }
+            .corte-grid { gap:4px; }
+            .corte-item { padding:6px; }
+            .corte-item .valor { font-size:0.85rem; }
+            .corte-total .valor { font-size:1.1rem; }
         }
     </style>
 </head>
@@ -298,7 +299,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cerrar'])) {
                 <input type="number" name="monto_cierre" step="0.01" min="0" required autofocus
                     value="<?php echo $saldo_esperado; ?>">
             </div>
-            <button type="submit" name="cerrar" value="1" class="btn-guardar" style="width:100%;margin-top:8px;text-align:center;"
+            <button type="submit" name="cerrar" value="1" class="btn-guardar" style="width:100%;margin-top:8px;justify-content:center;"
                 onclick="return confirm('¿Estás seguro de cerrar la caja?')">
                 🔒 Cerrar Caja
             </button>
