@@ -65,6 +65,10 @@ if (!$taller['suscripcion_activa'] || strtotime($taller['fecha_vencimiento']) < 
 $GLOBALS['taller_id'] = (int)$taller['id'];
 $GLOBALS['taller_nombre'] = $taller['nombre'];
 $GLOBALS['taller_subdominio'] = $subdominio;
+$GLOBALS['taller_db_host'] = $taller['db_host'];
+$GLOBALS['taller_db_user'] = $taller['db_user'];
+$GLOBALS['taller_db_pass'] = $taller['db_pass'];
+$GLOBALS['taller_db_name'] = $taller['db_name'];
 
 $conn = new mysqli($taller['db_host'], $taller['db_user'], $taller['db_pass'], $taller['db_name']);
 
