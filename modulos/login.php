@@ -166,8 +166,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <div class="login-card">
     <div class="login-logo">
         <img src="ordenes/logo_login.png?v=<?php echo filemtime('ordenes/logo_login.png'); ?>" alt="FullTaller" onerror="this.style.display='none'">
-        <h2>FullTaller</h2>
-        <p><?php echo $taller_nombre_login; ?></p>
+        <h2><?php echo $taller_nombre_login; ?></h2>
     </div>
 
     <?php if ($error): ?>
