@@ -847,6 +847,56 @@ code {
         grid-template-columns: 1fr;
     }
     .vuelto-total { font-size: 1.4rem; }
+    .carrito-items { max-height: 45vh; }
+}
+
+@media (max-width: 480px) {
+    .nav-logo { height: 34px; }
+    .nav-brand-text { display: none; }
+    .caja-monto-nav { display: none; }
+    .rol-badge { font-size: 0.65rem; padding: 2px 6px; }
+    .btn-hamburger { width: 34px; height: 34px; font-size: 1.1rem; }
+    .nav-jb .nav-btn { padding: 0.3rem 0.6rem; font-size: 0.75rem; }
+    .scan-input-group input { font-size: 1rem; padding: 12px 14px; }
+    .scan-input-group .btn-scan { padding: 12px 16px; font-size: 1.1rem; }
+    .carrito-header, .carrito-item {
+        grid-template-columns: 1fr 0.5fr 0.7fr 0.4fr;
+        font-size: 0.75rem;
+        gap: 4px;
+        padding: 6px 6px;
+    }
+    .carrito-header span:nth-child(3),
+    .carrito-item .precio {
+        display: none;
+    }
+    .carrito-items { max-height: calc(100vh - 280px); }
+    .carrito-item .cant { font-size: 0.75rem; padding: 2px 6px; }
+    .btn-eliminar-item { font-size: 0.85rem; padding: 4px 8px; }
+    .totales { padding: 8px 12px; margin: 6px 0; }
+    .grand-total { font-size: 1.1rem; }
+    .btn-cobrar { padding: 16px; font-size: 1.1rem; }
+    .btn-limpiar { padding: 10px; font-size: 0.85rem; }
+    .modal-content {
+        padding: 16px;
+        width: 100%;
+        max-width: 100%;
+        border-radius: 12px 12px 0 0;
+        margin-top: auto;
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+    .modal-overlay {
+        align-items: flex-end;
+    }
+    .vuelto-total { font-size: 1.2rem; padding: 8px; }
+    .vuelto-resultado { font-size: 1.2rem; padding: 10px; }
+    .modal-actions { gap: 6px; margin-top: 12px; }
+    .modal-actions .btn-full { padding: 14px; font-size: 0.95rem; }
+    .scan-section { padding: 8px 12px; }
+    .scan-simple label { font-size: 0.8rem; }
+    .cart-header-row h2 { font-size: 1rem; }
+    .panel { padding: 10px; }
+    .alert { font-size: 0.8rem; padding: 10px 12px; }
 }
 
 /* ===== BOTÓN ELIMINAR ITEM ===== */

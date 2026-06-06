@@ -111,7 +111,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cobrar'])) {
             </button>
             <a href="index.php" style="display:inline-flex;align-items:center;gap:10px;text-decoration:none;">
                 <img src="logo.png?v=<?php echo filemtime('logo.png'); ?>" alt="FullTaller" class="nav-logo" onerror="this.style.display='none'">
-                <span style="color:white;font-size:0.95rem;font-weight:500;">Punto de venta</span>
+                <span class="nav-brand-text" style="color:white;font-size:0.95rem;font-weight:500;">Punto de venta</span>
             </a>
         </div>
         <div class="nav-center d-none d-md-flex" style="align-items:center;">
