@@ -134,16 +134,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cobrar'])) {
         </div>
         <div class="nav-right">
             <span class="caja-monto-nav" style="margin-right:8px;">💰 $<?php echo number_format($saldo_caja, 2); ?></span>
-            <span class="rol-badge" style="margin-right:6px;">
+            <span class="rol-badge">
                 <?php echo esAdminPOS() ? '👑' : '👤'; ?>
                 <?php echo htmlspecialchars($_SESSION['nombre']); ?>
             </span>
-            <a href="logout.php" class="nav-btn">➤ Salir</a>
         </div>
     </div>
 </nav>
 
-<div class="pos-wrapper">
+<div class="pos-wrapper pos-full">
 
     <?php if (isset($venta_exitosa) && (!isset($_POST['imprimir']) || $_POST['imprimir'] === '0')): ?>
     <div class="alert success" style="margin-bottom:12px;">✅ Venta #<?php echo $venta_id_success; ?> registrada por <?php echo htmlspecialchars($_SESSION['nombre']); ?>!</div>

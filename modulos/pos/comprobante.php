@@ -173,16 +173,21 @@ $tiene_logo = !empty($config['logo_comprobante']) && file_exists(__DIR__ . '/log
         body.dark-mode .comp-footer { border-top-color: #2d3748; color: #64748b; }
 
         @media print {
-            body { background: white !important; }
+            body { background: white !important; color: #1e293b !important; }
             .no-print { display: none !important; }
             .cliente-display { display: block !important; }
             .cliente-form { display: none !important; }
             .comprobante-content { box-shadow: none; padding: 20px; max-width: 100%; }
             .comp-tabla thead { background: #001845 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
             .comp-header { border-bottom-color: #001845 !important; }
+            .comp-header .comp-info h2 { color: #001845 !important; }
+            .comp-header .comp-info p { color: #334155 !important; }
             .comp-cliente { background: #f8faff !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-            .comp-total { color: #10b981 !important; }
-            .item-row td { border-bottom: 1px solid #ddd !important; }
+            .comp-cliente h5 { color: #001845 !important; }
+            .cliente-grid .cli-label { color: #475569 !important; }
+            .cliente-grid div { color: #1e293b !important; }
+            .comp-total { color: #059669 !important; }
+            .item-row td { border-bottom: 1px solid #cbd5e1 !important; }
             .item-row td input {
                 border: none;
                 padding: 2px;
@@ -190,8 +195,9 @@ $tiene_logo = !empty($config['logo_comprobante']) && file_exists(__DIR__ . '/log
                 color: #1e293b;
                 font-size: 0.85rem;
             }
-            .item-row td input.item-subtotal { color: #10b981; font-weight: 600; }
+            .item-row td input.item-subtotal { color: #059669; font-weight: 600; }
             .btn-remove-item { display: none; }
+            .comp-footer { color: #64748b !important; border-top-color: #cbd5e1 !important; }
         }
     </style>
 </head>
@@ -224,11 +230,10 @@ $tiene_logo = !empty($config['logo_comprobante']) && file_exists(__DIR__ . '/log
             <a href="corte_caja.php" class="nav-btn">🔒 Corte</a>
         </div>
         <div class="nav-right">
-            <span class="rol-badge" style="margin-right:6px;">
+            <span class="rol-badge">
                 <?php echo esAdminPOS() ? '👑' : '👤'; ?>
                 <?php echo htmlspecialchars($_SESSION['nombre']); ?>
             </span>
-            <a href="logout.php" class="nav-btn">➤ Salir</a>
         </div>
     </div>
 </nav>
@@ -315,7 +320,7 @@ $tiene_logo = !empty($config['logo_comprobante']) && file_exists(__DIR__ . '/log
         </div>
 
         <div class="comp-footer">
-            Comprobante generado el <?php echo date('d/m/Y H:i'); ?> por <?php echo htmlspecialchars($_SESSION['nombre']); ?>
+            Comprobante generado el <?php echo date('d/m/Y H:i'); ?>
         </div>
     </div>
 </div>

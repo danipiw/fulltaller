@@ -89,11 +89,10 @@ $usuarios_lista = $db->query('SELECT id, nombre, usuario, rol, modulos, activo, 
             <a href="corte_caja.php" class="nav-btn">🔒 Corte</a>
         </div>
         <div class="nav-right">
-            <span class="rol-badge" style="margin-right:6px;">
+            <span class="rol-badge">
                 <?php echo esAdminPOS() ? '👑' : '👤'; ?>
                 <?php echo htmlspecialchars($_SESSION['nombre']); ?>
             </span>
-            <a href="logout.php" class="nav-btn">➤ Salir</a>
         </div>
     </div>
 </nav>

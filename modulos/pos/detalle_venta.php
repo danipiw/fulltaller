@@ -70,11 +70,10 @@ $metodo_icono = ['efectivo' => '💵', 'tarjeta' => '💳', 'transferencia' => '
             <a href="corte_caja.php" class="nav-btn">🔒 Corte</a>
         </div>
         <div class="nav-right">
-            <span class="rol-badge" style="margin-right:6px;">
+            <span class="rol-badge">
                 <?php echo esAdminPOS() ? '👑' : '👤'; ?>
                 <?php echo htmlspecialchars($_SESSION['nombre']); ?>
             </span>
-            <a href="logout.php" class="nav-btn">➤ Salir</a>
         </div>
     </div>
 </nav>
@@ -136,7 +135,7 @@ $metodo_icono = ['efectivo' => '💵', 'tarjeta' => '💳', 'transferencia' => '
                 <?php endwhile; ?>
             </tbody>
             <tfoot>
-                <tr style="background:#f1f5f9;">
+                <tr>
                     <td colspan="4" style="text-align:right;font-weight:700;font-size:1.1rem;">TOTAL</td>
                     <td style="text-align:right;font-weight:700;font-size:1.1rem;color:var(--jb-success);">$<?php echo number_format($venta['total'], 2); ?></td>
                 </tr>

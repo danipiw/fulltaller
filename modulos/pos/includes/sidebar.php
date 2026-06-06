@@ -43,7 +43,7 @@
 
             <hr class="sidebar-divider">
 
-            <a href="configuracion.php" class="sidebar-menu-item">
+            <a href="configuracion.php" class="sidebar-menu-item" data-bs-dismiss="offcanvas">
                 <i class="bi bi-gear"></i>
                 <span>Configuración</span>
             </a>

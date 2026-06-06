@@ -850,6 +850,31 @@ code {
     .carrito-items { max-height: 45vh; }
 }
 
+/* ===== POS FULL HEIGHT (index.php) ===== */
+.pos-full {
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - 56px);
+    overflow: hidden;
+    padding-bottom: 0;
+}
+.pos-full .scan-section {
+    flex-shrink: 0;
+}
+.pos-full .cart-panel {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    margin-bottom: 0;
+}
+.pos-full .cart-panel .carrito-items {
+    flex: 1;
+    overflow-y: auto;
+    min-height: 0;
+    max-height: none !important;
+}
+
 @media (max-width: 480px) {
     .nav-logo { height: 34px; }
     .nav-brand-text { display: none; }

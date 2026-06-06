@@ -112,7 +112,6 @@ $db->close();
                 <?php echo esAdminPOS() ? '👑' : '👤'; ?>
                 <?php echo htmlspecialchars($_SESSION['nombre']); ?>
             </span>
-            <a href="logout.php" class="nav-btn">➤ Salir</a>
         </div>
     </div>
 </nav>
