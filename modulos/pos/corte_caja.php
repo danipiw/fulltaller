@@ -89,6 +89,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cerrar'])) {
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <style>
+        body { overflow:hidden; }
         .corte-grid { display:grid; grid-template-columns:1fr 1fr; gap:6px; }
         .corte-item { background:#f8faff; padding:8px; border-radius:8px; text-align:center; }
         .corte-item .label { font-size:0.65rem; color:#64748b; font-weight:600; text-transform:uppercase; }
