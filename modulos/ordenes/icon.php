@@ -4,7 +4,7 @@
 // Reads logo_login.png and resizes on the fly
 
 $size = max(48, min(1024, (int)($_GET['size'] ?? 192)));
-$src = __DIR__ . '/logo_login.png';
+$src = __DIR__ . '/logocel.png';
 
 if (!file_exists($src)) {
     http_response_code(404);
