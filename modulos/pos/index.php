@@ -123,9 +123,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cobrar'])) {
             <a href="index.php" class="nav-btn active">🛒 Vender</a>
             <?php if (esAdminPOS()): ?>
             <span class="nav-sep">|</span>
-            <a href="usuarios.php" class="nav-btn">👥 Usuarios</a>
-            <?php endif; ?>
-            <span class="nav-sep">|</span>
             <button type="button" class="nav-btn" onclick="abrirModalMovimiento('ingreso')">📥 Ingreso</button>
             <span class="nav-sep">|</span>
             <button type="button" class="nav-btn" onclick="abrirModalMovimiento('egreso')">📤 Egreso</button>

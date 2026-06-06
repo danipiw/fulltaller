@@ -218,10 +218,6 @@ $tiene_logo = !empty($config['logo_comprobante']) && file_exists(__DIR__ . '/log
         </div>
         <div class="nav-center d-none d-md-flex" style="align-items:center;">
             <a href="index.php" class="nav-btn">🛒 Vender</a>
-            <?php if (esAdminPOS()): ?>
-            <span class="nav-sep">|</span>
-            <a href="usuarios.php" class="nav-btn">👥 Usuarios</a>
-            <?php endif; ?>
             <span class="nav-sep">|</span>
             <a href="index.php" class="nav-btn">📥 Ingreso</a>
             <span class="nav-sep">|</span>

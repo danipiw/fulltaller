@@ -136,10 +136,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cerrar'])) {
         </div>
         <div class="nav-center d-none d-md-flex" style="align-items:center;">
             <a href="index.php" class="nav-btn">🛒 Vender</a>
-            <?php if (esAdminPOS()): ?>
-            <span class="nav-sep">|</span>
-            <a href="usuarios.php" class="nav-btn">👥 Usuarios</a>
-            <?php endif; ?>
             <span class="nav-sep">|</span>
             <a href="index.php" class="nav-btn">📥 Ingreso</a>
             <span class="nav-sep">|</span>
@@ -302,7 +298,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cerrar'])) {
                 <input type="number" name="monto_cierre" step="0.01" min="0" required autofocus
                     value="<?php echo $saldo_esperado; ?>">
             </div>
-            <button type="submit" name="cerrar" value="1" class="btn-guardar" style="width:100%;margin-top:8px;"
+            <button type="submit" name="cerrar" value="1" class="btn-guardar" style="width:100%;margin-top:8px;text-align:center;"
                 onclick="return confirm('¿Estás seguro de cerrar la caja?')">
                 🔒 Cerrar Caja
             </button>

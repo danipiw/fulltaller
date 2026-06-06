@@ -113,10 +113,6 @@ $cajeros = $db->query("SELECT id, nombre FROM usuarios WHERE activo=1 ORDER BY n
         </div>
         <div class="nav-center d-none d-md-flex" style="align-items:center;">
             <a href="index.php" class="nav-btn">🛒 Vender</a>
-            <?php if (esAdminPOS()): ?>
-            <span class="nav-sep">|</span>
-            <a href="usuarios.php" class="nav-btn">👥 Usuarios</a>
-            <?php endif; ?>
             <span class="nav-sep">|</span>
             <a href="index.php" class="nav-btn">📥 Ingreso</a>
             <span class="nav-sep">|</span>
@@ -183,7 +179,7 @@ $cajeros = $db->query("SELECT id, nombre FROM usuarios WHERE activo=1 ORDER BY n
             <div style="display:flex;gap:16px;margin-top:8px;flex-wrap:wrap;">
                 <span>💵 Efectivo: <strong style="color:var(--jb-success);">$<?php echo number_format($totales_metodo['efectivo'], 2); ?></strong></span>
                 <span>💳 Tarjeta: <strong style="color:var(--jb-azul);">$<?php echo number_format($totales_metodo['tarjeta'], 2); ?></strong></span>
-                <span>🏦 Transferencia: <strong style="color:var(--jb-navy);">$<?php echo number_format($totales_metodo['transferencia'], 2); ?></strong></span>
+                <span>🏦 Transferencia: <strong style="color:var(--jb-azul);">$<?php echo number_format($totales_metodo['transferencia'], 2); ?></strong></span>
             </div>
             <?php endif; ?>
         </div>
@@ -200,7 +196,7 @@ $cajeros = $db->query("SELECT id, nombre FROM usuarios WHERE activo=1 ORDER BY n
                     <th>Items</th>
                     <th>Total</th>
                     <th>Método de Pago</th>
-                    <th class="text-end">Acción</th>
+                    <th class="text-center">Acción</th>
                 </tr>
             </thead>
             <tbody>
