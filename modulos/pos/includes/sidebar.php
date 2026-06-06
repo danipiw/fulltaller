@@ -43,12 +43,10 @@
 
             <hr class="sidebar-divider">
 
-            <?php if (esAdminPOS()): ?>
             <a href="configuracion.php" class="sidebar-menu-item">
                 <i class="bi bi-gear"></i>
                 <span>Configuración</span>
             </a>
-            <?php endif; ?>
         </div>
 
         <div style="flex:1;"></div>

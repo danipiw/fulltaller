@@ -102,9 +102,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cerrar'])) {
         body.dark-mode .corte-item { background:#0f1729; }
         body.dark-mode .corte-item .label { color:#94a3b8; }
         body.dark-mode .corte-detalle td { border-bottom-color:#2d3748; color:#cbd5e1; }
-        .corte-scroll { flex:1; overflow-y:auto; min-height:0; padding-bottom:8px; }
-        .cierre-form { margin-top:8px; }
-        .cierre-form form input[type="number"] { font-size:1.2rem; text-align:center; padding:10px; border:2px solid var(--jb-azul); border-radius:8px; }
+        .corte-scroll { flex:1; overflow-y:auto; min-height:0; }
+        .corte-scroll .panel { padding:10px 12px; margin-bottom:6px; }
+        .corte-scroll .panel:last-child { margin-bottom:0; }
+        .corte-scroll .panel h2 { font-size:1rem; margin-bottom:8px; }
+        .cierre-form { margin-top:6px; max-width:400px; margin-left:auto; margin-right:auto; }
+        .cierre-form .panel-content { display:flex; flex-direction:column; align-items:center; }
+        .cierre-form form { width:100%; }
         .cierre-form form input[type="number"] { font-size:1.2rem; text-align:center; padding:10px; border:2px solid var(--jb-azul); border-radius:8px; }
         .cierre-form .form-group { margin-bottom:4px; }
         @media (max-width:480px) {
@@ -289,7 +293,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cerrar'])) {
 
     <div class="panel cierre-form">
         <h2>🔒 Cerrar Caja</h2>
-        <p style="color:#64748b;margin-bottom:16px;">
+        <p style="color:#64748b;margin-bottom:10px;font-size:0.85rem;">
             Ingresá el dinero <strong>físico</strong> que hay en la caja para cerrar el turno.
         </p>
         <form method="POST">

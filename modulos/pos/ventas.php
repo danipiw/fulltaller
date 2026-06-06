@@ -141,39 +141,37 @@ $cajeros = $db->query("SELECT id, nombre FROM usuarios WHERE activo=1 ORDER BY n
     <div class="panel filtros-panel">
         <h2>🔍 Filtros</h2>
         <form method="GET" class="filtros-form">
-            <div class="form-row">
-                <div class="form-group">
-                    <label>Fecha:</label>
-                    <input type="date" name="fecha" value="<?php echo htmlspecialchars($filtro_fecha); ?>">
-                </div>
-                <div class="form-group">
-                    <label>Cajero:</label>
-                    <select name="cajero">
-                        <option value="">Todos</option>
-                        <?php while ($c = $cajeros->fetch_assoc()): ?>
-                        <option value="<?php echo $c['id']; ?>" <?php echo $filtro_cajero == $c['id'] ? 'selected' : ''; ?>>
-                            <?php echo htmlspecialchars($c['nombre']); ?>
-                        </option>
-                        <?php endwhile; ?>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>Método de Pago:</label>
-                    <select name="metodo">
-                        <option value="">Todos</option>
-                        <option value="efectivo" <?php echo $filtro_metodo === 'efectivo' ? 'selected' : ''; ?>>💵 Efectivo</option>
-                        <option value="tarjeta" <?php echo $filtro_metodo === 'tarjeta' ? 'selected' : ''; ?>>💳 Tarjeta</option>
-                        <option value="transferencia" <?php echo $filtro_metodo === 'transferencia' ? 'selected' : ''; ?>>🏦 Transferencia</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>Estado:</label>
-                    <select name="anuladas">
-                        <option value="">Todas</option>
-                        <option value="no" <?php echo $filtro_anuladas === 'no' ? 'selected' : ''; ?>>Activas</option>
-                        <option value="si" <?php echo $filtro_anuladas === 'si' ? 'selected' : ''; ?>>Anuladas</option>
-                    </select>
-                </div>
+            <div class="form-group">
+                <label>Fecha:</label>
+                <input type="date" name="fecha" value="<?php echo htmlspecialchars($filtro_fecha); ?>">
+            </div>
+            <div class="form-group">
+                <label>Cajero:</label>
+                <select name="cajero">
+                    <option value="">Todos</option>
+                    <?php while ($c = $cajeros->fetch_assoc()): ?>
+                    <option value="<?php echo $c['id']; ?>" <?php echo $filtro_cajero == $c['id'] ? 'selected' : ''; ?>>
+                        <?php echo htmlspecialchars($c['nombre']); ?>
+                    </option>
+                    <?php endwhile; ?>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Método de Pago:</label>
+                <select name="metodo">
+                    <option value="">Todos</option>
+                    <option value="efectivo" <?php echo $filtro_metodo === 'efectivo' ? 'selected' : ''; ?>>💵 Efectivo</option>
+                    <option value="tarjeta" <?php echo $filtro_metodo === 'tarjeta' ? 'selected' : ''; ?>>💳 Tarjeta</option>
+                    <option value="transferencia" <?php echo $filtro_metodo === 'transferencia' ? 'selected' : ''; ?>>🏦 Transferencia</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Estado:</label>
+                <select name="anuladas">
+                    <option value="">Todas</option>
+                    <option value="no" <?php echo $filtro_anuladas === 'no' ? 'selected' : ''; ?>>Activas</option>
+                    <option value="si" <?php echo $filtro_anuladas === 'si' ? 'selected' : ''; ?>>Anuladas</option>
+                </select>
             </div>
             <button type="submit" class="btn-guardar">🔍 Filtrar</button>
             <a href="ventas.php" class="btn-cancelar">Limpiar</a>
@@ -202,7 +200,7 @@ $cajeros = $db->query("SELECT id, nombre FROM usuarios WHERE activo=1 ORDER BY n
                     <th>Items</th>
                     <th>Total</th>
                     <th>Método de Pago</th>
-                    <th>Acción</th>
+                    <th class="text-end">Acción</th>
                 </tr>
             </thead>
             <tbody>
@@ -225,7 +223,7 @@ $cajeros = $db->query("SELECT id, nombre FROM usuarios WHERE activo=1 ORDER BY n
                         }
                         ?>
                     </td>
-                    <td>
+                    <td class="text-end">
                         <div style="display:flex;gap:4px;">
                         <?php if (!$anulada): ?>
                         <a href="ticket.php?id=<?php echo $v['id']; ?>" class="btn-primary btn-sm" style="text-decoration:none;font-size:0.75rem;padding:4px 8px;" onclick="event.stopPropagation();" target="_blank">🖨️ Ticket</a>
