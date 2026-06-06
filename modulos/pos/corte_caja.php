@@ -102,12 +102,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cerrar'])) {
         body.dark-mode .corte-item { background:#0f1729; }
         body.dark-mode .corte-item .label { color:#94a3b8; }
         body.dark-mode .corte-detalle td { border-bottom-color:#2d3748; color:#cbd5e1; }
-        .corte-scroll { flex:1; overflow-y:auto; min-height:0; }
+        .corte-scroll { flex:1; min-height:0; overflow:hidden; }
         .corte-scroll .panel { padding:8px 10px; margin-bottom:4px; }
         .corte-scroll .panel:last-child { margin-bottom:0; }
         .corte-scroll .panel h2 { font-size:0.9rem; margin:0 0 6px 0; }
         .corte-scroll .panel p { margin-bottom:6px !important; }
-        .page-header { margin-bottom:8px; }
+        .page-header { margin-bottom:4px; }
         .cierre-form { margin-top:4px; max-width:400px; margin-left:auto; margin-right:auto; }
         .cierre-form form input[type="number"] { font-size:1.1rem; text-align:center; padding:8px; border:2px solid var(--jb-azul); border-radius:8px; }
         .cierre-form .form-group { margin-bottom:2px; }
@@ -290,7 +290,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cerrar'])) {
 
     <div class="panel cierre-form">
         <h2>🔒 Cerrar Caja</h2>
-        <p style="color:#64748b;margin-bottom:10px;font-size:0.85rem;">
+        <p style="color:#64748b;font-size:0.85rem;margin-bottom:6px !important;">
             Ingresá el dinero <strong>físico</strong> que hay en la caja para cerrar el turno.
         </p>
         <form method="POST">
