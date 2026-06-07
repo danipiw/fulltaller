@@ -358,23 +358,33 @@ function badgeClass($estado) {
             transform: translateY(-1px);
         }
 
-        /* Colores por estado */
-        .est-INGRESADO label { background-color: #6c757d20; color: #6c757d; border-color: #6c757d40; }
-        .est-INGRESADO input:checked + label { background-color: #6c757d; color: white; }
-        .est-EN-REVISION label { background-color: #0dcaf020; color: #055160; border-color: #0dcaf040; }
-        .est-EN-REVISION input:checked + label { background-color: #0dcaf0; color: white; }
-        .est-EN-ESPERA label { background-color: #ffc10720; color: #664d03; border-color: #ffc10740; }
-        .est-EN-ESPERA input:checked + label { background-color: #ffc107; color: #1a1a1a; }
-        .est-APROBADO label { background-color: #20c99720; color: #0a3622; border-color: #20c99740; }
-        .est-APROBADO input:checked + label { background-color: #20c997; color: white; }
-        .est-PRESUPUESTO-RECHAZADO label { background-color: #dc354520; color: #842029; border-color: #dc354540; }
-        .est-PRESUPUESTO-RECHAZADO input:checked + label { background-color: #dc3545; color: white; }
-        .est-REPARADO label { background-color: #19875420; color: #0f5132; border-color: #19875440; }
-        .est-REPARADO input:checked + label { background-color: #198754; color: white; }
-        .est-SIN-REPARACION label { background-color: #21252920; color: #212529; border-color: #21252940; }
-        .est-SIN-REPARACION input:checked + label { background-color: #212529; color: white; }
-        .est-ENTREGADO label { background-color: #0d6efd20; color: #084298; border-color: #0d6efd40; }
-        .est-ENTREGADO input:checked + label { background-color: #0d6efd; color: white; }
+        /* Colores por estado (dinámico) */
+        <?php
+        $estado_hex = [
+            'INGRESADO' => ['bg'=>'#6c757d', 'fg'=>'#6c757d'],
+            'EN REVISION' => ['bg'=>'#0dcaf0', 'fg'=>'#055160'],
+            'EN ESPERA' => ['bg'=>'#ffc107', 'fg'=>'#664d03'],
+            'APROBADO' => ['bg'=>'#20c997', 'fg'=>'#0a3622'],
+            'PRESUPUESTO RECHAZADO' => ['bg'=>'#dc3545', 'fg'=>'#842029'],
+            'REPARADO' => ['bg'=>'#198754', 'fg'=>'#0f5132'],
+            'SIN REPARACION' => ['bg'=>'#212529', 'fg'=>'#212529'],
+            'ENTREGADO' => ['bg'=>'#0d6efd', 'fg'=>'#084298'],
+        ];
+        $palette = ['#6c757d','#0dcaf0','#ffc107','#20c997','#dc3545','#212529','#0d6efd','#e83e8c','#fd7e14','#6f42c1','#17a2b8','#28a745'];
+        foreach ($todos_estados as $est):
+            $cls = 'est-' . str_replace(' ', '-', $est);
+            if (isset($estado_hex[$est])) {
+                $hex = $estado_hex[$est]['bg'];
+                $fg = $estado_hex[$est]['fg'];
+            } else {
+                $idx = abs(crc32($est)) % count($palette);
+                $hex = $palette[$idx];
+                $fg = '#1e293b';
+            }
+            echo ".$cls label { background-color: {$hex}20; color: $fg; border-color: {$hex}40; }\n";
+            echo ".$cls input:checked + label { background-color: $hex; color: white; }\n";
+        endforeach;
+        ?>
 
         /* ===== BOTONES ESTADO TÉCNICO ===== */
         .estado-botones {
@@ -714,22 +724,18 @@ function badgeClass($estado) {
         body.dark-mode .btn-estado-aprobado { background: linear-gradient(135deg, #0284c7, #0369a1) !important; }
         body.dark-mode .btn-estado-reparado { background: linear-gradient(135deg, #16a34a, #15803d) !important; }
         body.dark-mode .btn-estado-sinreparacion { background: linear-gradient(135deg, #4b5563, #374151) !important; }
-        body.dark-mode .est-INGRESADO label { background-color: #374151; color: #9ca3af; border-color: #4b5563; }
-        body.dark-mode .est-INGRESADO input:checked + label { background-color: #6b7280; color: white; }
-        body.dark-mode .est-EN-REVISION label { background-color: #0e4a5a; color: #67e8f9; border-color: #155e75; }
-        body.dark-mode .est-EN-REVISION input:checked + label { background-color: #06b6d4; color: white; }
-        body.dark-mode .est-EN-ESPERA label { background-color: #5a4a0e; color: #fde047; border-color: #854d0e; }
-        body.dark-mode .est-EN-ESPERA input:checked + label { background-color: #eab308; color: #1a1a1a; }
-        body.dark-mode .est-APROBADO label { background-color: #0e4a2e; color: #6ee7b7; border-color: #15803d; }
-        body.dark-mode .est-APROBADO input:checked + label { background-color: #10b981; color: white; }
-        body.dark-mode .est-PRESUPUESTO-RECHAZADO label { background-color: #5a1a1a; color: #fca5a5; border-color: #991b1b; }
-        body.dark-mode .est-PRESUPUESTO-RECHAZADO input:checked + label { background-color: #ef4444; color: white; }
-        body.dark-mode .est-REPARADO label { background-color: #0e4a2e; color: #6ee7b7; border-color: #15803d; }
-        body.dark-mode .est-REPARADO input:checked + label { background-color: #22c55e; color: white; }
-        body.dark-mode .est-SIN-REPARACION label { background-color: #1f2937; color: #d1d5db; border-color: #374151; }
-        body.dark-mode .est-SIN-REPARACION input:checked + label { background-color: #4b5563; color: white; }
-        body.dark-mode .est-ENTREGADO label { background-color: #0e2a5a; color: #93c5fd; border-color: #1e40af; }
-        body.dark-mode .est-ENTREGADO input:checked + label { background-color: #3b82f6; color: white; }
+        /* Dark mode estados (dinámico) */
+        <?php
+        $dm_dark = ['#374151','#0e4a5a','#5a4a0e','#0e4a2e','#5a1a1a','#1f2937','#0e2a5a','#3b1a5a','#5a3a0e','#3a1a5a','#0e3a5a','#0a4a3a'];
+        $dm_color = ['#9ca3af','#67e8f9','#fde047','#6ee7b7','#fca5a5','#d1d5db','#93c5fd','#d8b4fe','#fdba74','#c4b5fd','#67e8f9','#86efac'];
+        $dm_checked_bg = ['#6b7280','#06b6d4','#eab308','#10b981','#ef4444','#4b5563','#3b82f6','#a855f7','#f97316','#8b5cf6','#06b6d4','#22c55e'];
+        foreach ($todos_estados as $i=>$est):
+            $cls = 'est-' . str_replace(' ', '-', $est);
+            $di = $i % count($dm_dark);
+            echo "body.dark-mode .$cls label { background-color: {$dm_dark[$di]}; color: {$dm_color[$di]}; border-color: {$dm_dark[$di]}; }\n";
+            echo "body.dark-mode .$cls input:checked + label { background-color: {$dm_checked_bg[$di]}; color: white; }\n";
+        endforeach;
+        ?>
 
         /* ===== MOBILE CARDS ===== */
         .mobile-card {

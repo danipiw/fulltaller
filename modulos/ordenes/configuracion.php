@@ -20,8 +20,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $taller_direccion = $conn->real_escape_string($_POST['taller_direccion'] ?? '');
     $taller_telefono = $conn->real_escape_string($_POST['taller_telefono'] ?? '');
     $legal_terminos = $conn->real_escape_string($_POST['legal_terminos'] ?? '');
-    $estados_recepcion = $conn->real_escape_string($_POST['estados_recepcion'] ?? '');
-    $estados_tecnico = $conn->real_escape_string($_POST['estados_tecnico'] ?? '');
+    $nombres_rec = isset($_POST['estados_recepcion_nombre']) ? array_filter($_POST['estados_recepcion_nombre'], 'trim') : [];
+    $nombres_tec = isset($_POST['estados_tecnico_nombre']) ? array_filter($_POST['estados_tecnico_nombre'], 'trim') : [];
+    $estados_recepcion = $conn->real_escape_string(implode(', ', $nombres_rec));
+    $estados_tecnico = $conn->real_escape_string(implode(', ', $nombres_tec));
     $tipo_impresion = $conn->real_escape_string($_POST['tipo_impresion'] ?? 'dos_vias');
 
     $conn->query("INSERT INTO configuracion (clave, valor) VALUES ('taller_nombre', '$taller_nombre') ON DUPLICATE KEY UPDATE valor = '$taller_nombre'");
@@ -121,24 +123,83 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
         </div>
 
+        <?php
+        include 'includes/estados_helper.php';
+        $rec_estados = obtenerEstadosRecepcion($conn);
+        $tec_estados = obtenerEstadosTecnico($conn);
+        $colores_map = [
+            'bg-secondary' => '#6c757d', 'bg-info' => '#0dcaf0', 'bg-warning text-dark' => '#ffc107',
+            'bg-success' => '#20c997', 'bg-danger' => '#dc3545', 'bg-dark' => '#212529', 'bg-primary' => '#0d6efd',
+        ];
+        function colorEstado($nombre) {
+            $mapa = [
+                'INGRESADO'=>'#6c757d','EN REVISION'=>'#0dcaf0','EN ESPERA'=>'#ffc107',
+                'APROBADO'=>'#20c997','PRESUPUESTO RECHAZADO'=>'#dc3545',
+                'REPARADO'=>'#198754','SIN REPARACION'=>'#212529','ENTREGADO'=>'#0d6efd',
+            ];
+            if (isset($mapa[$nombre])) return $mapa[$nombre];
+            $colores = ['#6c757d','#0dcaf0','#ffc107','#20c997','#dc3545','#212529','#0d6efd','#e83e8c','#fd7e14','#6f42c1'];
+            return $colores[abs(crc32($nombre)) % count($colores)];
+        }
+        ?>
+
         <div class="card card-config mb-3">
             <div class="card-body">
                 <h5><i class="bi bi-diagram-3"></i> Estados personalizados</h5>
-                <p class="text-muted small">Personalizá los estados que aparecen en el listado de órdenes. Ingresá los nombres separados por coma. Si se deja vacío, se usan los estados por defecto.</p>
-                <div class="row g-3">
+                <p class="text-muted small">Hacé clic en el nombre del estado para editarlo. Usá el <b>+</b> para agregar nuevos. Los estados vacíos se ignoran al guardar.</p>
+                <div class="row g-4">
                     <div class="col-md-6">
-                        <label class="form-label">Estados para Recepción</label>
-                        <input type="text" name="estados_recepcion" class="form-control" value="<?php echo htmlspecialchars($config['estados_recepcion'] ?? ''); ?>" placeholder="INGRESADO, EN ESPERA, APROBADO, ...">
-                        <div class="form-text">Ej: <code>INGRESADO, EN ESPERA, APROBADO, RECHAZADO</code></div>
+                        <label class="form-label fw-semibold">📋 Recepción</label>
+                        <div class="estados-grid" id="grid-recepcion">
+                            <?php foreach ($rec_estados as $e): ?>
+                            <div class="estado-chip">
+                                <span class="color-swatch" style="background:<?php echo colorEstado($e); ?>"></span>
+                                <input type="text" name="estados_recepcion_nombre[]" value="<?php echo htmlspecialchars($e); ?>" class="form-control form-control-sm estado-input" placeholder="Estado...">
+                                <button type="button" class="btn-remove-chip" onclick="this.closest('.estado-chip').remove()">✕</button>
+                            </div>
+                            <?php endforeach; ?>
+                            <?php for ($i = 0; $i < 5; $i++): ?>
+                            <div class="estado-chip nuevo">
+                                <span class="color-swatch" style="background:#6c757d"></span>
+                                <input type="text" name="estados_recepcion_nombre[]" value="" class="form-control form-control-sm estado-input" placeholder="Nuevo estado...">
+                            </div>
+                            <?php endfor; ?>
+                        </div>
                     </div>
                     <div class="col-md-6">
-                        <label class="form-label">Estados para Técnico</label>
-                        <input type="text" name="estados_tecnico" class="form-control" value="<?php echo htmlspecialchars($config['estados_tecnico'] ?? ''); ?>" placeholder="EN REVISION, REPARADO, ...">
-                        <div class="form-text">Ej: <code>EN REVISION, EN ESPERA, REPARADO, SIN REPARACION</code></div>
+                        <label class="form-label fw-semibold">🔧 Técnico</label>
+                        <div class="estados-grid" id="grid-tecnico">
+                            <?php foreach ($tec_estados as $e): ?>
+                            <div class="estado-chip">
+                                <span class="color-swatch" style="background:<?php echo colorEstado($e); ?>"></span>
+                                <input type="text" name="estados_tecnico_nombre[]" value="<?php echo htmlspecialchars($e); ?>" class="form-control form-control-sm estado-input" placeholder="Estado...">
+                                <button type="button" class="btn-remove-chip" onclick="this.closest('.estado-chip').remove()">✕</button>
+                            </div>
+                            <?php endforeach; ?>
+                            <?php for ($i = 0; $i < 5; $i++): ?>
+                            <div class="estado-chip nuevo">
+                                <span class="color-swatch" style="background:#6c757d"></span>
+                                <input type="text" name="estados_tecnico_nombre[]" value="" class="form-control form-control-sm estado-input" placeholder="Nuevo estado...">
+                            </div>
+                            <?php endfor; ?>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
+
+        <style>
+        .estados-grid { display:flex; flex-direction:column; gap:6px; }
+        .estado-chip { display:flex; align-items:center; gap:8px; }
+        .estado-chip .color-swatch { width:28px; height:28px; border-radius:6px; flex-shrink:0; border:1px solid rgba(0,0,0,0.1); }
+        .estado-chip .estado-input { flex:1; font-size:0.85rem; padding:6px 10px; border-radius:6px; }
+        .btn-remove-chip { background:none; border:1px solid #e2e8f0; border-radius:6px; width:30px; height:30px; display:flex; align-items:center; justify-content:center; color:#ef4444; cursor:pointer; font-size:0.85rem; flex-shrink:0; transition:all 0.2s; }
+        .btn-remove-chip:hover { background:#fee2e2; border-color:#ef4444; }
+        .estado-chip.nuevo .color-swatch { opacity:0.5; }
+        body.dark-mode .estado-chip .estado-input { background:#0f1729; color:#e2e8f0; border-color:#2d3748; }
+        body.dark-mode .btn-remove-chip { border-color:#2d3748; color:#fca5a5; }
+        body.dark-mode .btn-remove-chip:hover { background:#7f1d1d; border-color:#ef4444; }
+        </style>
 
         <div class="card card-config mb-3">
             <div class="card-body">
