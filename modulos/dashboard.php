@@ -109,7 +109,7 @@ $rol = $_SESSION['rol'];
         <?php endif; ?>
 
         <?php if (in_array('finanzas', $modulos)): ?>
-        <a href="#" class="module-card" onclick="alert('M&oacute;dulo en desarrollo'); return false;">
+        <a href="finanzas/index.php" class="module-card" target="_blank">
             <div class="icon"><i class="bi bi-cash-stack"></i></div>
             <div class="name">Finanzas</div>
             <div class="desc">Reportes y gesti&oacute;n financiera</div>
