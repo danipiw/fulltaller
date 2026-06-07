@@ -146,7 +146,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <div class="card card-config mb-3">
             <div class="card-body">
                 <h5><i class="bi bi-diagram-3"></i> Estados personalizados</h5>
-                <p class="text-muted small">Hacé clic en el nombre del estado para editarlo. Usá el <b>+</b> para agregar nuevos. Los estados vacíos se ignoran al guardar.</p>
+                <p class="text-muted small">Hacé clic en el nombre del estado para editarlo. Los estados vacíos se ignoran al guardar.</p>
                 <div class="row g-4">
                     <div class="col-md-6">
                         <label class="form-label fw-semibold">📋 Recepción</label>
