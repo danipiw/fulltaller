@@ -16,6 +16,21 @@ if ($r) {
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     include 'includes/estados_helper.php';
 
+    $logo_subido = false;
+    if (isset($_FILES['logo_ordenes_file']) && $_FILES['logo_ordenes_file']['tmp_name']) {
+        $ext = strtolower(pathinfo($_FILES['logo_ordenes_file']['name'], PATHINFO_EXTENSION));
+        if (in_array($ext, ['png', 'jpg', 'jpeg', 'gif', 'webp'])) {
+            $dest = __DIR__ . '/logo_ordenes.png';
+            if (move_uploaded_file($_FILES['logo_ordenes_file']['tmp_name'], $dest)) {
+                $logo_subido = true;
+            } else {
+                $error = 'Error al subir el logo.';
+            }
+        } else {
+            $error = 'Formato de imagen no válido (solo PNG, JPG, GIF, WebP).';
+        }
+    }
+
     $taller_nombre = $conn->real_escape_string($_POST['taller_nombre'] ?? '');
     $taller_direccion = $conn->real_escape_string($_POST['taller_direccion'] ?? '');
     $taller_telefono = $conn->real_escape_string($_POST['taller_telefono'] ?? '');
@@ -33,6 +48,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $conn->query("INSERT INTO configuracion (clave, valor) VALUES ('estados_recepcion', '$estados_recepcion') ON DUPLICATE KEY UPDATE valor = '$estados_recepcion'");
     $conn->query("INSERT INTO configuracion (clave, valor) VALUES ('estados_tecnico', '$estados_tecnico') ON DUPLICATE KEY UPDATE valor = '$estados_tecnico'");
     $conn->query("INSERT INTO configuracion (clave, valor) VALUES ('tipo_impresion', '$tipo_impresion') ON DUPLICATE KEY UPDATE valor = '$tipo_impresion'");
+    $logo_val = $logo_subido ? '1' : ($config['logo_ordenes'] ?? '');
+    $conn->query("INSERT INTO configuracion (clave, valor) VALUES ('logo_ordenes', '$logo_val') ON DUPLICATE KEY UPDATE valor = '$logo_val'");
 
     if ($conn->error) {
         $error = 'Error al guardar: ' . $conn->error;
@@ -45,6 +62,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $config['estados_recepcion'] = $estados_recepcion;
         $config['estados_tecnico'] = $estados_tecnico;
         $config['tipo_impresion'] = $tipo_impresion;
+        if ($logo_subido) $config['logo_ordenes'] = '1';
     }
 }
 ?>
@@ -110,7 +128,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
     ?>
 
-    <form method="POST">
+    <form method="POST" enctype="multipart/form-data">
         <ul class="nav nav-tabs mb-3" id="configTabs" role="tablist">
             <li class="nav-item" role="presentation">
                 <button class="nav-link active" id="tab-taller" data-bs-toggle="tab" data-bs-target="#pane-taller" type="button" role="tab"><i class="bi bi-shop"></i> Datos del Taller</button>
@@ -209,6 +227,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             <!-- Tab: Impresión -->
             <div class="tab-pane fade" id="pane-impresion" role="tabpanel">
+                <div class="card card-config mb-3">
+                    <div class="card-body">
+                        <h5><i class="bi bi-image"></i> Logo para Órdenes y Comprobantes</h5>
+                        <p class="text-muted small">Subí un logo que aparecerá en la copia del cliente y en los comprobantes (PNG, JPG, GIF o WebP).</p>
+                        <?php if (!empty($config['logo_ordenes']) && file_exists(__DIR__ . '/logo_ordenes.png')): ?>
+                        <div style="margin-bottom:12px;">
+                            <img src="logo_ordenes.png?v=<?php echo filemtime(__DIR__ . '/logo_ordenes.png'); ?>" style="max-height:80px;border-radius:8px;border:1px solid #e2e8f0;padding:4px;background:white;">
+                        </div>
+                        <?php endif; ?>
+                        <input type="file" name="logo_ordenes_file" accept="image/png,image/jpeg,image/gif,image/webp" class="form-control">
+                        <div class="form-text">Formatos permitidos: PNG, JPG, GIF, WebP.</div>
+                    </div>
+                </div>
+
                 <div class="card card-config mb-3">
                     <div class="card-body">
                         <h5><i class="bi bi-printer"></i> Tipo de Impresión</h5>

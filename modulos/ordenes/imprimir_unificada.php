@@ -578,6 +578,8 @@ $tracking_url = $protocol . '://' . $_SERVER['HTTP_HOST'] . '/seguimiento.php?to
             margin-bottom: 5px;
             letter-spacing: -0.5px;
         }
+        .hoja-cliente .header-center .header-logo { margin-bottom: 6px; }
+        .hoja-cliente .header-center .header-logo img { max-height: 60px; max-width: 200px; }
         .hoja-cliente .header-center .taller-nombre {
             font-size: 14px;
             font-weight: 700;
@@ -976,6 +978,11 @@ $tracking_url = $protocol . '://' . $_SERVER['HTTP_HOST'] . '/seguimiento.php?to
                 <?php echo date('H:i:s', strtotime($orden['fecha_ingreso'])); ?>
             </div>
             <div class="header-center">
+                <?php if (!empty($config_imp['logo_ordenes']) && file_exists(__DIR__ . '/logo_ordenes.png')): ?>
+                <div class="header-logo">
+                    <img src="logo_ordenes.png?v=<?php echo filemtime(__DIR__ . '/logo_ordenes.png'); ?>" alt="Logo">
+                </div>
+                <?php endif; ?>
                 <h1>Orden de Reparación</h1>
                 <div class="taller-nombre"><?php echo htmlspecialchars($config_imp['taller_nombre'] ?? 'FullTaller'); ?></div>
                 <div class="taller-datos">
