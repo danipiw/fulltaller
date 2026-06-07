@@ -43,7 +43,7 @@ if (empty($subdominio)) {
     die("Acceso denegado. Use un subdominio válido (ej: sutaller.sudominio.com)");
 }
 
-require_once __DIR__ . '/conexion_central.php';
+require_once dirname(__DIR__, 2) . '/ordenes/includes/conexion_central.php';
 
 $subdominio_escaped = $conn_central->real_escape_string($subdominio);
 $result = $conn_central->query("SELECT id, nombre, db_host, db_user, db_pass, db_name, suscripcion_activa, fecha_vencimiento, activo FROM talleres WHERE subdominio = '$subdominio_escaped' LIMIT 1");
