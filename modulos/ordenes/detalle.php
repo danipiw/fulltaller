@@ -760,6 +760,13 @@ while ($f = $result_fotos->fetch_assoc()) {
                         <span id="valPresupuesto">$<?php echo number_format($orden['presupuesto'], 2); ?></span>
                         <a href="#" onclick="event.preventDefault();editarCampo('presupuesto',<?php echo $orden['presupuesto']; ?>)" style="font-size:0.75rem;color:var(--jb-cyan);text-decoration:none;margin-left:4px;"><i class="bi bi-pencil"></i></a>
                     </p>
+                    <?php if ($ES_ADMIN): ?>
+                    <p class="mb-1" style="font-size:0.9rem;">
+                        <strong>Costo:</strong>
+                        <span id="valCosto">$<?php echo number_format($orden['costo'] ?? 0, 2); ?></span>
+                        <a href="#" onclick="event.preventDefault();editarCampo('costo',<?php echo $orden['costo'] ?? 0; ?>)" style="font-size:0.75rem;color:var(--jb-cyan);text-decoration:none;margin-left:4px;"><i class="bi bi-pencil"></i></a>
+                    </p>
+                    <?php endif; ?>
                     <div id="senaDisplay">
                         <?php if ($orden['sena'] > 0): ?>
                             <div class="sena-box" style="padding:4px 8px; font-size:0.85rem;">
@@ -1055,14 +1062,15 @@ function eliminarFoto(id) {
 function editarCampo(campo, valorActual) {
     const cont = campo === 'presupuesto'
         ? document.getElementById('valPresupuesto').parentNode
-        : document.getElementById('senaDisplay');
-    const htmlOrig = cont.innerHTML;
+        : campo === 'costo'
+            ? document.getElementById('valCosto').parentNode
+            : document.getElementById('senaDisplay');
     const input = document.createElement('span');
     input.innerHTML = '<input type="number" step="0.01" class="form-control form-control-sm" style="display:inline-block;width:100px;font-size:0.85rem;" id="inputEdit" value="' + valorActual + '"> ' +
         '<button class="btn btn-sm btn-success" style="padding:0.1rem 0.4rem;font-size:0.7rem;" onclick="guardarCampo(\'' + campo + '\',' + <?php echo $id; ?> + ')"><i class="bi bi-check"></i></button> ' +
         '<button class="btn btn-sm btn-secondary" style="padding:0.1rem 0.4rem;font-size:0.7rem;" onclick="cancelarEdicion(this)"><i class="bi bi-x"></i></button>';
-    if (campo === 'presupuesto') {
-        const p = document.getElementById('valPresupuesto');
+    if (campo === 'presupuesto' || campo === 'costo') {
+        const p = document.getElementById(campo === 'presupuesto' ? 'valPresupuesto' : 'valCosto');
         p.style.display = 'none';
         p.parentNode.insertBefore(input, p.nextSibling);
     } else {
@@ -1077,17 +1085,21 @@ function cancelarEdicion(btn) {
 
 function guardarCampo(campo, ordenId) {
     const val = document.getElementById('inputEdit').value;
-    const otroCampo = campo === 'presupuesto' ? 'sena' : 'presupuesto';
-    const otroVal = document.getElementById(otroCampo === 'presupuesto' ? 'valPresupuesto' : 'valSena');
-    const otroNum = otroVal ? parseFloat(otroVal.textContent.replace(/[^0-9.,]/g,'').replace(',','.')) || 0 : 0;
     const formData = new FormData();
     formData.append('orden_id', ordenId);
-    if (campo === 'presupuesto') {
-        formData.append('presupuesto', val);
-        formData.append('sena', otroNum);
+    if (campo === 'costo') {
+        formData.append('costo', val);
     } else {
-        formData.append('presupuesto', otroNum);
-        formData.append('sena', val);
+        const otroCampo = campo === 'presupuesto' ? 'sena' : 'presupuesto';
+        const otroVal = document.getElementById(otroCampo === 'presupuesto' ? 'valPresupuesto' : 'valSena');
+        const otroNum = otroVal ? parseFloat(otroVal.textContent.replace(/[^0-9.,]/g,'').replace(',','.')) || 0 : 0;
+        if (campo === 'presupuesto') {
+            formData.append('presupuesto', val);
+            formData.append('sena', otroNum);
+        } else {
+            formData.append('presupuesto', otroNum);
+            formData.append('sena', val);
+        }
     }
     fetch('guardar_presupuesto.php', { method: 'POST', body: formData })
     .then(r => r.json())

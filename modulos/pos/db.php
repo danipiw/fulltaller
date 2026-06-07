@@ -120,6 +120,7 @@ function initPosTables($mysqli) {
         codigo VARCHAR(50) NOT NULL,
         descripcion VARCHAR(255) NOT NULL,
         precio DECIMAL(10,2) NOT NULL,
+        costo DECIMAL(12,2) NOT NULL DEFAULT 0.00,
         stock INT DEFAULT 0,
         activo TINYINT DEFAULT 1,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,

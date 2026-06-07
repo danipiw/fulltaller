@@ -19,11 +19,11 @@ if (isset($_GET['exportar'])) {
 
     $output = fopen('php://output', 'w');
     fprintf($output, chr(0xEF).chr(0xBB).chr(0xBF));
-    fputcsv($output, ['codigo', 'descripcion', 'precio', 'stock']);
+    fputcsv($output, ['codigo', 'descripcion', 'precio', 'costo', 'stock']);
 
-    $productos_exp = $db->query('SELECT codigo, descripcion, precio, stock FROM pos_productos WHERE activo=1 ORDER BY descripcion');
+    $productos_exp = $db->query('SELECT codigo, descripcion, precio, costo, stock FROM pos_productos WHERE activo=1 ORDER BY descripcion');
     while ($p = $productos_exp->fetch_assoc()) {
-        fputcsv($output, [$p['codigo'], $p['descripcion'], $p['precio'], $p['stock']]);
+        fputcsv($output, [$p['codigo'], $p['descripcion'], $p['precio'], $p['costo'], $p['stock']]);
     }
     fclose($output);
     $db->close();
@@ -54,6 +54,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['importar'])) {
                     $codigo = trim($data[0] ?? '');
                     $descripcion = trim($data[1] ?? '');
                     $precio = floatval(str_replace(',', '.', str_replace('$', '', $data[2] ?? '0')));
+                    $costo = isset($data[4]) ? floatval(str_replace(',', '.', str_replace('$', '', $data[4]))) : 0;
                     $stock = intval($data[3] ?? 0);
 
                     if (!$codigo || !$descripcion || $precio <= 0) {
@@ -70,14 +71,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['importar'])) {
                         $stmt_check->close();
 
                         if ($existe) {
-                            $stmt = $db->prepare('UPDATE pos_productos SET descripcion = ?, precio = ?, stock = ?, activo = 1 WHERE codigo = ?');
-                            $stmt->bind_param('sdis', $descripcion, $precio, $stock, $codigo);
+                            $stmt = $db->prepare('UPDATE pos_productos SET descripcion = ?, precio = ?, costo = ?, stock = ?, activo = 1 WHERE codigo = ?');
+                            $stmt->bind_param('sddis', $descripcion, $precio, $costo, $stock, $codigo);
                             $stmt->execute();
                             $stmt->close();
                             $actualizados++;
                         } else {
-                            $stmt = $db->prepare('INSERT INTO pos_productos (codigo, descripcion, precio, stock) VALUES (?, ?, ?, ?)');
-                            $stmt->bind_param('ssdi', $codigo, $descripcion, $precio, $stock);
+                            $stmt = $db->prepare('INSERT INTO pos_productos (codigo, descripcion, precio, costo, stock) VALUES (?, ?, ?, ?, ?)');
+                            $stmt->bind_param('ssddi', $codigo, $descripcion, $precio, $costo, $stock);
                             $stmt->execute();
                             $stmt->close();
                             $importados++;
@@ -106,6 +107,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['importar'])) {
                 $codigo = trim($data[0]);
                 $descripcion = trim($data[1]);
                 $precio = floatval(str_replace(',', '.', str_replace('$', '', $data[2])));
+                $costo = isset($data[4]) ? floatval(str_replace(',', '.', str_replace('$', '', $data[4]))) : 0;
                 $stock = intval($data[3]);
 
                 if (!$codigo || !$descripcion || $precio <= 0) {
@@ -122,14 +124,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['importar'])) {
                     $stmt_check->close();
 
                     if ($existe) {
-                        $stmt = $db->prepare('UPDATE pos_productos SET descripcion = ?, precio = ?, stock = ?, activo = 1 WHERE codigo = ?');
-                        $stmt->bind_param('sdis', $descripcion, $precio, $stock, $codigo);
+                        $stmt = $db->prepare('UPDATE pos_productos SET descripcion = ?, precio = ?, costo = ?, stock = ?, activo = 1 WHERE codigo = ?');
+                        $stmt->bind_param('sddis', $descripcion, $precio, $costo, $stock, $codigo);
                         $stmt->execute();
                         $stmt->close();
                         $actualizados++;
                     } else {
-                        $stmt = $db->prepare('INSERT INTO pos_productos (codigo, descripcion, precio, stock) VALUES (?, ?, ?, ?)');
-                        $stmt->bind_param('ssdi', $codigo, $descripcion, $precio, $stock);
+                        $stmt = $db->prepare('INSERT INTO pos_productos (codigo, descripcion, precio, costo, stock) VALUES (?, ?, ?, ?, ?)');
+                        $stmt->bind_param('ssddi', $codigo, $descripcion, $precio, $costo, $stock);
                         $stmt->execute();
                         $stmt->close();
                         $importados++;
@@ -156,14 +158,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['importar'])) {
         $codigo = trim($_POST['codigo']);
         $descripcion = trim($_POST['descripcion']);
         $precio = floatval($_POST['precio']);
+        $costo = floatval($_POST['costo'] ?? 0);
         $stock = intval($_POST['stock']);
         
         if ($id) {
-            $stmt = $db->prepare('UPDATE pos_productos SET codigo=?, descripcion=?, precio=?, stock=? WHERE id=?');
-            $stmt->bind_param('ssdii', $codigo, $descripcion, $precio, $stock, $id);
+            $stmt = $db->prepare('UPDATE pos_productos SET codigo=?, descripcion=?, precio=?, costo=?, stock=? WHERE id=?');
+            $stmt->bind_param('ssddii', $codigo, $descripcion, $precio, $costo, $stock, $id);
         } else {
-            $stmt = $db->prepare('INSERT INTO pos_productos (codigo, descripcion, precio, stock) VALUES (?, ?, ?, ?)');
-            $stmt->bind_param('ssdi', $codigo, $descripcion, $precio, $stock);
+            $stmt = $db->prepare('INSERT INTO pos_productos (codigo, descripcion, precio, costo, stock) VALUES (?, ?, ?, ?, ?)');
+            $stmt->bind_param('ssddi', $codigo, $descripcion, $precio, $costo, $stock);
         }
         $stmt->execute();
         $stmt->close();
@@ -288,6 +291,7 @@ $productos = $db->query("SELECT * FROM pos_productos WHERE activo=1 $where_busqu
                     <th>Código</th>
                     <th>Descripción</th>
                     <th>Precio</th>
+                    <th>Costo</th>
                     <th>Stock</th>
                     <th>Acciones</th>
                 </tr>
@@ -298,11 +302,12 @@ $productos = $db->query("SELECT * FROM pos_productos WHERE activo=1 $where_busqu
                     <td><code><?php echo htmlspecialchars($p['codigo']); ?></code></td>
                     <td><?php echo htmlspecialchars($p['descripcion']); ?></td>
                     <td class="precio">$<?php echo number_format($p['precio'], 2); ?></td>
+                    <td class="costo">$<?php echo number_format($p['costo'] ?? 0, 2); ?></td>
                     <td><?php echo $p['stock']; ?></td>
                     <td class="actions">
                         <?php if (esAdminPOS()): ?>
                         <button type="button" class="btn-edit" 
-                            onclick="editarProducto(<?php echo $p['id']; ?>, '<?php echo htmlspecialchars(addslashes($p['codigo'])); ?>', '<?php echo htmlspecialchars(addslashes($p['descripcion'])); ?>', <?php echo $p['precio']; ?>, <?php echo $p['stock']; ?>)">✏️</button>
+                            onclick="editarProducto(<?php echo $p['id']; ?>, '<?php echo htmlspecialchars(addslashes($p['codigo'])); ?>', '<?php echo htmlspecialchars(addslashes($p['descripcion'])); ?>', <?php echo $p['precio']; ?>, <?php echo $p['costo'] ?? 0; ?>, <?php echo $p['stock']; ?>)">✏️</button>
                         <form method="POST" style="display:inline;" onsubmit="return confirm('¿Eliminar?')">
                             <input type="hidden" name="eliminar" value="<?php echo $p['id']; ?>">
                             <button type="submit" class="btn-delete">🗑️</button>
@@ -339,9 +344,15 @@ $productos = $db->query("SELECT * FROM pos_productos WHERE activo=1 $where_busqu
                 <input type="text" name="descripcion" id="form-producto-descripcion" required placeholder="Nombre del producto">
             </div>
             
-            <div class="form-group">
-                <label>Stock:</label>
-                <input type="number" name="stock" id="form-producto-stock" value="0" min="0">
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Costo:</label>
+                    <input type="number" step="0.01" name="costo" id="form-producto-costo" value="0.00" min="0" placeholder="0.00">
+                </div>
+                <div class="form-group">
+                    <label>Stock:</label>
+                    <input type="number" name="stock" id="form-producto-stock" value="0" min="0">
+                </div>
             </div>
             
             <div style="display:flex;gap:8px;margin-top:16px;">
@@ -359,7 +370,7 @@ $productos = $db->query("SELECT * FROM pos_productos WHERE activo=1 $where_busqu
         
         <div class="ie-box" style="margin-bottom:12px;">
             <h3>📥 Importar desde Excel/CSV</h3>
-            <p class="hint">Formatos: .xlsx, .xls, .csv — Columnas: código | descripción | precio | stock (con encabezado)</p>
+            <p class="hint">Formatos: .xlsx, .xls, .csv — Columnas: código | descripción | precio | stock | costo (opcional, con encabezado)</p>
             <form method="POST" enctype="multipart/form-data">
                 <input type="file" name="archivo_csv" accept=".csv,.xlsx,.xls" required style="margin-bottom:8px;">
                 <button type="submit" name="importar" class="btn-guardar">📥 Importar</button>
@@ -383,17 +394,19 @@ function abrirModalProducto() {
     document.getElementById('form-producto-codigo').value = '';
     document.getElementById('form-producto-descripcion').value = '';
     document.getElementById('form-producto-precio').value = '';
+    document.getElementById('form-producto-costo').value = '0.00';
     document.getElementById('form-producto-stock').value = '0';
     document.getElementById('modal-producto').style.display = 'flex';
     setTimeout(() => document.getElementById('form-producto-codigo').focus(), 200);
 }
 
-function editarProducto(id, codigo, descripcion, precio, stock) {
+function editarProducto(id, codigo, descripcion, precio, costo, stock) {
     document.getElementById('modal-producto-title').textContent = '✏️ Editar Producto';
     document.getElementById('form-producto-id').value = id;
     document.getElementById('form-producto-codigo').value = codigo;
     document.getElementById('form-producto-descripcion').value = descripcion;
     document.getElementById('form-producto-precio').value = precio;
+    document.getElementById('form-producto-costo').value = costo;
     document.getElementById('form-producto-stock').value = stock;
     document.getElementById('modal-producto').style.display = 'flex';
     setTimeout(() => document.getElementById('form-producto-codigo').focus(), 200);
@@ -422,7 +435,7 @@ document.addEventListener('DOMContentLoaded', function() {
     $stmt->close();
     if ($editP):
     ?>
-    editarProducto(<?php echo $editP['id']; ?>, '<?php echo htmlspecialchars(addslashes($editP['codigo'])); ?>', '<?php echo htmlspecialchars(addslashes($editP['descripcion'])); ?>', <?php echo $editP['precio']; ?>, <?php echo $editP['stock']; ?>);
+    editarProducto(<?php echo $editP['id']; ?>, '<?php echo htmlspecialchars(addslashes($editP['codigo'])); ?>', '<?php echo htmlspecialchars(addslashes($editP['descripcion'])); ?>', <?php echo $editP['precio']; ?>, <?php echo $editP['costo'] ?? 0; ?>, <?php echo $editP['stock']; ?>);
     <?php endif; ?>
 });
 <?php endif; ?>
