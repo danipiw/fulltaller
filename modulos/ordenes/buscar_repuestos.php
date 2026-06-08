@@ -1,4 +1,7 @@
 <?php
+session_start();
+if (!isset($_SESSION['rol'])) { header('Content-Type: application/json'); echo json_encode([]); exit; }
+if (!empty($_SESSION['login_host']) && $_SESSION['login_host'] !== ($_SERVER['HTTP_HOST'] ?? '')) { session_destroy(); header('Content-Type: application/json'); echo json_encode([]); exit; }
 include 'includes/conexion.php';
 header('Content-Type: application/json');
 

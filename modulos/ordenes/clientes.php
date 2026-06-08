@@ -519,5 +519,6 @@ editarCliente(
 
 
 </script>
+<?php require 'includes/api_token_script.php'; ?>
 </body>
 </html>

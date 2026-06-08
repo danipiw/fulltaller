@@ -620,5 +620,6 @@ if (localStorage.getItem('jb_dark_mode') === '1') {
 }
 updateDarkModeIcon();
 </script>
+<?php require 'includes/api_token_script.php'; ?>
 </body>
 </html>

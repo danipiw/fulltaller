@@ -2,11 +2,13 @@
 header('Content-Type: application/json');
 session_start();
 require_once 'db.php';
+require_once 'includes/verificar_token.php';
 
 if (!isset($_SESSION['usuario_id'], $_SESSION['rol'], $_SESSION['user_modulos']) || strpos($_SESSION['user_modulos'], 'pos') === false) {
     echo json_encode(['success' => false, 'error' => 'No autorizado']);
     exit;
 }
+verificarAcceso();
 
 if (!isset($_POST['id']) || !is_numeric($_POST['id'])) {
     echo json_encode(['success' => false, 'error' => 'ID inválido']);

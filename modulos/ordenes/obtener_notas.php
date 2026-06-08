@@ -1,6 +1,9 @@
 <?php
 
 header('Content-Type: application/json');
+session_start();
+if (!isset($_SESSION['rol'])) { echo json_encode(['success' => false, 'error' => 'No autorizado']); exit; }
+if (!empty($_SESSION['login_host']) && $_SESSION['login_host'] !== ($_SERVER['HTTP_HOST'] ?? '')) { session_destroy(); echo json_encode(['success' => false, 'error' => 'No autorizado']); exit; }
 include 'includes/conexion.php';
 
 if (!isset($_GET['orden_id']) || !is_numeric($_GET['orden_id'])) {

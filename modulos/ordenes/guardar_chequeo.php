@@ -3,12 +3,14 @@ error_reporting(0);
 session_start();
 header('Content-Type: application/json');
 
+require_once 'includes/verificar_token.php';
 include 'includes/conexion.php';
 
 if (!isset($_SESSION['rol'])) {
     echo json_encode(['success' => false, 'error' => 'Sesión no válida']);
     exit;
 }
+verificarAcceso();
 if (!isset($_POST['orden_id']) || !is_numeric($_POST['orden_id'])) {
     echo json_encode(['success' => false, 'error' => 'ID inválido']);
     exit;

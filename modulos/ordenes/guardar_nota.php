@@ -1,6 +1,7 @@
 <?php
 session_start();
 header('Content-Type: application/json');
+require_once 'includes/verificar_token.php';
 include 'includes/conexion.php';
 
 // Verificar sesión
@@ -8,6 +9,7 @@ if (!isset($_SESSION['rol'])) {
     echo json_encode(['success' => false, 'error' => 'Sesión no válida']);
     exit;
 }
+verificarAcceso();
 
 // El autor se determina automáticamente por el rol de sesión
 $autor = $_SESSION['rol']; // 'recepcion' o 'tecnico'

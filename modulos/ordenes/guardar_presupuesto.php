@@ -1,6 +1,8 @@
 <?php
 include 'includes/verificar_sesion.php';
+require_once 'includes/verificar_token.php';
 header('Content-Type: application/json');
+verificarAcceso();
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     echo json_encode(['ok' => false, 'error' => 'Método no permitido']);

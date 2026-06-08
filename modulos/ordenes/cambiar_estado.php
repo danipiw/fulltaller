@@ -1,6 +1,7 @@
 <?php
 session_start();
 header('Content-Type: application/json');
+require_once 'includes/verificar_token.php';
 include 'includes/conexion.php';
 include 'includes/estados_helper.php';
 
@@ -9,6 +10,7 @@ if (!isset($_SESSION['rol'])) {
     echo json_encode(['success' => false, 'error' => 'Sesión no válida']);
     exit;
 }
+verificarAcceso();
 
 $rol_actual = $_SESSION['rol'];
 $es_full = ($rol_actual === 'full');

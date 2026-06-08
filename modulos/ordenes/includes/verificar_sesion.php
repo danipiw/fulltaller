@@ -34,3 +34,15 @@ if ($ES_ADMIN) {
 $TALLER_NOMBRE = $GLOBALS['taller_nombre'] ?? 'Taller';
 $TALLER_SUBDOMINIO = $GLOBALS['taller_subdominio'] ?? '';
 $TALLER_ID = $GLOBALS['taller_id'] ?? 0;
+
+// Verificar dominio (evita copia a otro hosting)
+if (!empty($_SESSION['login_host']) && $_SESSION['login_host'] !== ($_SERVER['HTTP_HOST'] ?? '')) {
+    session_destroy();
+    header('Location: ../../login.php?error=sesion');
+    exit;
+}
+
+// Generar token si no existe (sesiones existentes post-migración)
+if (!isset($_SESSION['api_token'])) {
+    $_SESSION['api_token'] = bin2hex(random_bytes(16));
+}

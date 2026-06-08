@@ -273,6 +273,7 @@ function anularVenta(id) {
         .catch(() => alert('❌ Error de conexión'));
 }
 </script>
+<?php require 'includes/api_token_script.php'; ?>
 </body>
 </html>
 <?php 

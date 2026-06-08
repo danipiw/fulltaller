@@ -1,12 +1,14 @@
 <?php
 session_start();
 require_once 'db.php';
+require_once 'includes/verificar_token.php';
 header('Content-Type: application/json');
 
 if (!isset($_SESSION['usuario_id'], $_SESSION['user_modulos']) || strpos($_SESSION['user_modulos'], 'pos') === false) {
     echo json_encode(['success' => false, 'message' => 'Sesión no válida']);
     exit;
 }
+verificarAcceso();
 
 $action = $_GET['action'] ?? '';
 

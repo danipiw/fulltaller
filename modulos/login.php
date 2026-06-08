@@ -96,6 +96,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $_SESSION['taller_db_user'] = $taller_db_user;
                     $_SESSION['taller_db_pass'] = $taller_db_pass;
                     $_SESSION['taller_db_name'] = $taller_db_name;
+                    $_SESSION['api_token'] = bin2hex(random_bytes(16));
+                    $_SESSION['login_host'] = $_SERVER['HTTP_HOST'] ?? '';
                     $conn->close();
                     header('Location: dashboard.php');
                     exit;

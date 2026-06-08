@@ -27,6 +27,8 @@ if ($resultado && $usuario = $resultado->fetch_assoc()) {
         $_SESSION['taller_db_pass'] = $GLOBALS['taller_db_pass'] ?? '';
         $_SESSION['taller_db_name'] = $GLOBALS['taller_db_name'] ?? '';
         $_SESSION['user_modulos'] = $usuario['modulos'] ?? 'ordenes';
+        $_SESSION['api_token'] = bin2hex(random_bytes(16));
+        $_SESSION['login_host'] = $_SERVER['HTTP_HOST'] ?? '';
         header("Location: $BASE/modulos/ordenes/listado.php");
         exit;
     }

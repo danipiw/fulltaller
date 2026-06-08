@@ -1,12 +1,14 @@
 <?php
 session_start();
 require_once 'db.php';
+require_once 'includes/verificar_token.php';
 
 if (!isset($_SESSION['usuario_id'], $_SESSION['rol'], $_SESSION['user_modulos']) || strpos($_SESSION['user_modulos'], 'pos') === false) {
     header('HTTP/1.0 401 Unauthorized');
     echo json_encode(['success' => false, 'message' => 'No autorizado']);
     exit;
 }
+verificarAcceso();
 
 header('Content-Type: application/json');
 $db = getDB();

@@ -1,5 +1,13 @@
 <?php
 
+session_start();
+require_once 'includes/verificar_token.php';
+if (!isset($_SESSION['rol'])) {
+    http_response_code(403);
+    echo json_encode(['ok' => false, 'error' => 'No autorizado']);
+    exit;
+}
+verificarAcceso();
 include 'includes/conexion.php';
 
 $nombre = $_POST['nombre'];
