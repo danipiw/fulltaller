@@ -42,6 +42,7 @@ if (isset($_GET['error'])) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="deploy-version" content="v3.0.1">
     <title><?php echo $taller_nombre_login; ?> - Inicio de Sesión</title>
     <link rel="manifest" href="modulos/manifest.php">
     <meta name="apple-mobile-web-app-capable" content="yes">
