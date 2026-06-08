@@ -10,4 +10,5 @@ if (!in_array('tienda', $user_modulos)) {
     exit;
 }
 $ES_ADMIN = in_array($_SESSION['rol'] ?? '', ['admin', 'full']);
+$PUEDE_EDITAR_TIENDA = $ES_ADMIN || in_array($_SESSION['rol'] ?? '', ['recepcion']);
 require_once __DIR__ . '/conexion.php';

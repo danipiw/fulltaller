@@ -1,23 +1,14 @@
 <?php
-// Public tracking + store page
 require_once __DIR__ . '/includes/conexion.php';
 
-// Auto-create tables
-$conn->query("CREATE TABLE IF NOT EXISTS tienda_productos (
-    id INT AUTO_INCREMENT PRIMARY KEY, nombre VARCHAR(255) NOT NULL,
-    descripcion TEXT, precio DECIMAL(10,2) NOT NULL,
-    imagen VARCHAR(255) DEFAULT NULL, activo TINYINT DEFAULT 1,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+// Asegurar columnas en pos_productos
+$conn->query("ALTER TABLE pos_productos ADD COLUMN IF NOT EXISTS visible_en_tienda TINYINT DEFAULT 0");
+$conn->query("ALTER TABLE pos_productos ADD COLUMN IF NOT EXISTS tienda_descripcion TEXT DEFAULT NULL");
+$conn->query("ALTER TABLE pos_productos ADD COLUMN IF NOT EXISTS tienda_imagen VARCHAR(255) DEFAULT NULL");
 
 $config_s = [];
 $r_s = $conn->query("SELECT clave, valor FROM configuracion");
-if ($r_s) {
-    while ($f_s = $r_s->fetch_assoc()) $config_s[$f_s['clave']] = $f_s['valor'];
-}
-
-$seguimiento_activo = ($config_s['seguimiento_activo'] ?? '1') === '1';
-$tienda_activa = ($config_s['tienda_activa'] ?? '0') === '1';
+if ($r_s) { while ($f_s = $r_s->fetch_assoc()) $config_s[$f_s['clave']] = $f_s['valor']; }
 $taller_nombre = htmlspecialchars($config_s['taller_nombre'] ?? 'Taller');
 
 $orden = null;
@@ -39,16 +30,12 @@ if ($token) {
         $stmt->execute();
         $orden = $stmt->get_result()->fetch_assoc();
         if (!$orden) $error = 'No encontramos una orden con ese N° y DNI.';
-    } else {
-        $error = 'Completá el N° de orden y el DNI.';
-    }
+    } else { $error = 'Completá el N° de orden y el DNI.'; }
 }
 
-$show_tracking = $orden && $seguimiento_activo;
-$show_store = $show_tracking && $tienda_activa;
-$productos = $show_store ? $conn->query("SELECT * FROM tienda_productos WHERE activo = 1 ORDER BY nombre") : null;
+$productos = $conn->query("SELECT id, codigo, descripcion AS nombre, precio, tienda_descripcion, tienda_imagen FROM pos_productos WHERE visible_en_tienda = 1 AND activo = 1 ORDER BY codigo ASC");
 
-if ($show_tracking):
+if ($orden):
     $orden_id = $orden['id'];
     $historial = $conn->prepare("SELECT * FROM estados_log WHERE orden_id = ? ORDER BY fecha DESC");
     $historial->bind_param("i", $orden_id); $historial->execute();
@@ -103,9 +90,7 @@ if ($show_tracking):
     </style>
 </head>
 <body>
-<div class="header-taller">
-    <h5><i class="bi bi-tools me-2"></i><?php echo $taller_nombre; ?></h5>
-</div>
+<div class="header-taller"><h5><i class="bi bi-tools me-2"></i><?php echo $taller_nombre; ?></h5></div>
 <div class="container py-4" style="max-width: 820px;">
     <div class="card p-3">
         <div class="d-flex justify-content-between align-items-center mb-2">
@@ -164,32 +149,28 @@ if ($show_tracking):
     </div>
     <?php endif; ?>
 
-    <?php if ($show_store): ?>
+    <?php if ($productos && $productos->num_rows > 0): ?>
     <div class="card p-3">
         <div class="card-title"><i class="bi bi-bag me-1"></i>Tienda — Accesorios y más</div>
         <p class="text-muted" style="font-size:0.85rem;">Aprovechá y llevate algún accesorio para tu equipo.</p>
         <div class="row g-3">
-            <?php if ($productos && $productos->num_rows > 0): ?>
-                <?php while ($p = $productos->fetch_assoc()): ?>
-                <div class="col-6 col-md-4">
-                    <div class="producto-card">
-                        <?php if ($p['imagen'] && file_exists("uploads/" . $p['imagen'])): ?>
-                        <img src="uploads/<?php echo htmlspecialchars($p['imagen']); ?>" class="producto-img" alt="<?php echo htmlspecialchars($p['nombre']); ?>">
-                        <?php else: ?>
-                        <div class="producto-img d-flex align-items-center justify-content-center" style="background:#f8f9fa;"><i class="bi bi-box" style="font-size:2.5rem;color:#adb5bd;"></i></div>
-                        <?php endif; ?>
-                        <div class="producto-nombre"><?php echo htmlspecialchars($p['nombre']); ?></div>
-                        <?php if ($p['descripcion']): ?><div class="producto-desc"><?php echo htmlspecialchars($p['descripcion']); ?></div><?php endif; ?>
-                        <div class="d-flex justify-content-between align-items-center mt-2">
-                            <span class="producto-precio">$<?php echo number_format($p['precio'], 2); ?></span>
-                            <button class="btn btn-sm btn-outline-primary add-to-cart" data-id="<?php echo $p['id']; ?>" data-nombre="<?php echo htmlspecialchars($p['nombre']); ?>" data-precio="<?php echo $p['precio']; ?>"><i class="bi bi-cart-plus"></i></button>
-                        </div>
+            <?php while ($p = $productos->fetch_assoc()): ?>
+            <div class="col-6 col-md-4">
+                <div class="producto-card">
+                    <?php if ($p['tienda_imagen'] && file_exists("uploads/" . $p['tienda_imagen'])): ?>
+                    <img src="uploads/<?php echo htmlspecialchars($p['tienda_imagen']); ?>" class="producto-img" alt="<?php echo htmlspecialchars($p['nombre']); ?>">
+                    <?php else: ?>
+                    <div class="producto-img d-flex align-items-center justify-content-center" style="background:#f8f9fa;"><i class="bi bi-box" style="font-size:2.5rem;color:#adb5bd;"></i></div>
+                    <?php endif; ?>
+                    <div class="producto-nombre"><?php echo htmlspecialchars($p['nombre']); ?></div>
+                    <?php if ($p['tienda_descripcion']): ?><div class="producto-desc"><?php echo htmlspecialchars($p['tienda_descripcion']); ?></div><?php endif; ?>
+                    <div class="d-flex justify-content-between align-items-center mt-2">
+                        <span class="producto-precio">$<?php echo number_format($p['precio'], 2); ?></span>
+                        <button class="btn btn-sm btn-outline-primary add-to-cart" data-id="<?php echo $p['id']; ?>" data-nombre="<?php echo htmlspecialchars($p['nombre']); ?>" data-precio="<?php echo $p['precio']; ?>"><i class="bi bi-cart-plus"></i></button>
                     </div>
                 </div>
-                <?php endwhile; ?>
-            <?php else: ?>
-            <div class="col-12 text-center py-4 text-muted"><i class="bi bi-box-seam" style="font-size:2rem;"></i><p class="mt-2">Próximamente disponibles</p></div>
-            <?php endif; ?>
+            </div>
+            <?php endwhile; ?>
         </div>
     </div>
     <?php endif; ?>
@@ -197,7 +178,6 @@ if ($show_tracking):
     <div class="footer-link"><i class="bi bi-shield-check me-1"></i><?php echo $taller_nombre; ?></div>
 </div>
 
-<?php if ($show_store): ?>
 <div class="badge-carrito" id="cart-badge" onclick="openCart()" style="display:none;"><span id="cart-count">0</span></div>
 <div class="offcanvas offcanvas-end" tabindex="-1" id="cart-offcanvas" style="--bs-offcanvas-width:360px;">
     <div class="offcanvas-header">
@@ -212,11 +192,9 @@ if ($show_tracking):
         <p class="text-muted mt-2" style="font-size:0.75rem;">Por ahora enviamos tu consulta por WhatsApp. Pronto podrás pagar online.</p>
     </div>
 </div>
-<?php endif; ?>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-<?php if ($show_store): ?>
 const cart = JSON.parse(localStorage.getItem('tienda_cart') || '[]');
 function saveCart() { localStorage.setItem('tienda_cart', JSON.stringify(cart)); updateCartUI(); }
 function updateCartUI() {
@@ -244,13 +222,10 @@ function checkout() {
 }
 document.querySelectorAll('.add-to-cart').forEach(b => b.addEventListener('click', function() { addToCart(this.dataset.id, this.dataset.nombre, this.dataset.precio); }));
 updateCartUI();
-<?php endif; ?>
 </script>
 </body>
 </html>
-<?php endif; ?>
-
-<?php if (!$show_tracking): ?>
+<?php else: ?>
 <!DOCTYPE html>
 <html lang="es">
 <head>

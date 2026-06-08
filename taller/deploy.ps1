@@ -34,13 +34,14 @@ function CreateFtpDir($path) {
 }
 
 function ToRemotePath($localPath) {
-    # taller/ → root, modulos/ → modulos/
+    # taller/ → public_html/ (raíz del sitio)
+    # modulos/, admin/ → public_html/modulos/, public_html/admin/
     if ($localPath -like "taller/*") {
-        return $localPath.Substring(7)  # remove "taller/"
-    } elseif ($localPath.StartsWith("taller/")) {
-        return $localPath.Substring(7)
+        $inner = $localPath.Substring(7)
+        if ([string]::IsNullOrEmpty($inner)) { return "public_html" }
+        return "public_html/$inner"
     }
-    return $localPath
+    return "public_html/$localPath"
 }
 
 function UploadFile($localFullPath, $remotePath) {

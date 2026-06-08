@@ -31,14 +31,8 @@ $protocol_d = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' :
 $host_d = $_SERVER['HTTP_HOST'];
 $token_d = $orden['token'] ?? '';
 
-// Determinar URL de seguimiento según config
-$cfg_tracking = $conn->query("SELECT clave, valor FROM configuracion WHERE clave IN ('seguimiento_activo','tienda_activa','taller_nombre')");
-$seguimiento_activo_d = '1'; $tienda_activa_d = '0';
-while ($r = $cfg_tracking->fetch_assoc()) {
-    if ($r['clave'] === 'seguimiento_activo') $seguimiento_activo_d = $r['valor'];
-    if ($r['clave'] === 'tienda_activa') $tienda_activa_d = $r['valor'];
-}
-if ($seguimiento_activo_d === '1' && $tienda_activa_d === '1') {
+$tiene_tienda_d = strpos($GLOBALS['taller_modulos'] ?? '', 'tienda') !== false;
+if ($tiene_tienda_d) {
     $tracking_url_d = "$protocol_d://$host_d/modulos/tienda/?token=$token_d";
 } else {
     $tracking_url_d = "$protocol_d://$host_d/seguimiento.php?token=$token_d";

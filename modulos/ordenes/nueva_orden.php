@@ -2,16 +2,10 @@
 
 include 'includes/verificar_sesion.php';
 
-// Determinar URL de seguimiento según config
-$cfg_t_n = $conn->query("SELECT clave, valor FROM configuracion WHERE clave IN ('seguimiento_activo','tienda_activa')");
-$seg_act = '1'; $tie_act = '0';
-while ($r_n = $cfg_t_n->fetch_assoc()) {
-    if ($r_n['clave'] === 'seguimiento_activo') $seg_act = $r_n['valor'];
-    if ($r_n['clave'] === 'tienda_activa') $tie_act = $r_n['valor'];
-}
 $protocol_n = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http';
 $host_n = $_SERVER['HTTP_HOST'];
-if ($seg_act === '1' && $tie_act === '1') {
+$tiene_tienda_n = isset($_SESSION['user_modulos']) && strpos($_SESSION['user_modulos'], 'tienda') !== false;
+if ($tiene_tienda_n) {
     $tracking_base_n = "$protocol_n://$host_n/modulos/tienda/?token=";
 } else {
     $tracking_base_n = "$protocol_n://$host_n/seguimiento.php?token=";

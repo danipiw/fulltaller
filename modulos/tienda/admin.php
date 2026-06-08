@@ -1,77 +1,58 @@
 <?php
 require_once __DIR__ . '/includes/verificar_sesion.php';
-if (!$ES_ADMIN) { header('Location: ../ordenes/listado.php?error=sin_acceso'); exit; }
+if (!$PUEDE_EDITAR_TIENDA) { header('Location: ../ordenes/listado.php?error=sin_acceso'); exit; }
 
 $mensaje = '';
 $error = '';
 
-$conn->query("CREATE TABLE IF NOT EXISTS tienda_productos (
-    id INT AUTO_INCREMENT PRIMARY KEY, nombre VARCHAR(255) NOT NULL,
-    descripcion TEXT, precio DECIMAL(10,2) NOT NULL,
-    imagen VARCHAR(255) DEFAULT NULL, activo TINYINT DEFAULT 1,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+// Asegurar columnas en pos_productos
+$conn->query("ALTER TABLE pos_productos ADD COLUMN IF NOT EXISTS visible_en_tienda TINYINT DEFAULT 0");
+$conn->query("ALTER TABLE pos_productos ADD COLUMN IF NOT EXISTS tienda_descripcion TEXT DEFAULT NULL");
+$conn->query("ALTER TABLE pos_productos ADD COLUMN IF NOT EXISTS tienda_imagen VARCHAR(255) DEFAULT NULL");
 
-// Cargar config
-$config_s = [];
-$r = $conn->query("SELECT clave, valor FROM configuracion");
-if ($r) { while ($f = $r->fetch_assoc()) $config_s[$f['clave']] = $f['valor']; }
-
-// Guardar config
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion']) && $_POST['accion'] === 'config') {
-    $seguimiento = ($_POST['seguimiento_activo'] ?? '0') === '1' ? '1' : '0';
-    $tienda = ($_POST['tienda_activa'] ?? '0') === '1' ? '1' : '0';
-    $conn->query("INSERT INTO configuracion (clave, valor) VALUES ('seguimiento_activo', '$seguimiento') ON DUPLICATE KEY UPDATE valor = '$seguimiento'");
-    $conn->query("INSERT INTO configuracion (clave, valor) VALUES ('tienda_activa', '$tienda') ON DUPLICATE KEY UPDATE valor = '$tienda'");
-    $config_s['seguimiento_activo'] = $seguimiento;
-    $config_s['tienda_activa'] = $tienda;
-    $mensaje = 'Configuración guardada.';
-}
-
-// Guardar/editar producto
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion']) && $_POST['accion'] === 'guardar') {
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion'])) {
     $id = (int)($_POST['id'] ?? 0);
-    $nombre = trim($_POST['nombre'] ?? '');
-    $descripcion = trim($_POST['descripcion'] ?? '');
-    $precio = (float)($_POST['precio'] ?? 0);
-    if (!$nombre || $precio <= 0) { $error = 'Completá nombre y precio.'; }
-    else {
-        $imagen = null;
-        if (isset($_FILES['imagen']) && $_FILES['imagen']['tmp_name']) {
-            $ext = strtolower(pathinfo($_FILES['imagen']['name'], PATHINFO_EXTENSION));
-            if (in_array($ext, ['jpg', 'jpeg', 'png', 'webp', 'gif'])) {
-                $upload_dir = __DIR__ . '/uploads/';
-                if (!is_dir($upload_dir)) mkdir($upload_dir, 0755, true);
-                $filename = 'prod_' . time() . '_' . bin2hex(random_bytes(4)) . '.' . $ext;
-                if (move_uploaded_file($_FILES['imagen']['tmp_name'], $upload_dir . $filename)) {
-                    $imagen = $filename;
-                    if ($id > 0) {
-                        $r2 = $conn->query("SELECT imagen FROM tienda_productos WHERE id = $id");
-                        if ($f2 = $r2->fetch_assoc()) { if ($f2['imagen'] && file_exists($upload_dir . $f2['imagen'])) unlink($upload_dir . $f2['imagen']); }
+    if ($_POST['accion'] === 'toggle') {
+        $conn->query("UPDATE pos_productos SET visible_en_tienda = NOT visible_en_tienda WHERE id = $id");
+        $mensaje = 'Visibilidad cambiada.';
+    } elseif ($_POST['accion'] === 'guardar') {
+        $descripcion = trim($_POST['tienda_descripcion'] ?? '');
+        $nombre = trim($_POST['nombre'] ?? '');
+        if (!$nombre) { $error = 'El nombre no puede estar vacío.'; }
+        else {
+            $imagen = null;
+            if (isset($_FILES['tienda_imagen']) && $_FILES['tienda_imagen']['tmp_name']) {
+                $ext = strtolower(pathinfo($_FILES['tienda_imagen']['name'], PATHINFO_EXTENSION));
+                if (in_array($ext, ['jpg', 'jpeg', 'png', 'webp', 'gif'])) {
+                    $upload_dir = __DIR__ . '/uploads/';
+                    if (!is_dir($upload_dir)) mkdir($upload_dir, 0755, true);
+                    $filename = 'prod_' . time() . '_' . bin2hex(random_bytes(4)) . '.' . $ext;
+                    if (move_uploaded_file($_FILES['tienda_imagen']['tmp_name'], $upload_dir . $filename)) {
+                        $imagen = $filename;
+                        $r2 = $conn->query("SELECT tienda_imagen FROM pos_productos WHERE id = $id");
+                        if ($f2 = $r2->fetch_assoc()) { if ($f2['tienda_imagen'] && file_exists($upload_dir . $f2['tienda_imagen'])) unlink($upload_dir . $f2['tienda_imagen']); }
                     }
                 }
             }
+            if ($imagen) {
+                $stmt = $conn->prepare("UPDATE pos_productos SET descripcion=?, tienda_descripcion=?, tienda_imagen=? WHERE id=?");
+                $stmt->bind_param("sssi", $nombre, $descripcion, $imagen, $id);
+            } else {
+                $stmt = $conn->prepare("UPDATE pos_productos SET descripcion=?, tienda_descripcion=? WHERE id=?");
+                $stmt->bind_param("ssi", $nombre, $descripcion, $id);
+            }
+            $stmt->execute();
+            $mensaje = 'Producto actualizado.';
         }
-        if ($id > 0) {
-            if ($imagen) { $stmt = $conn->prepare("UPDATE tienda_productos SET nombre=?, descripcion=?, precio=?, imagen=? WHERE id=?"); $stmt->bind_param("ssdsi", $nombre, $descripcion, $precio, $imagen, $id); }
-            else { $stmt = $conn->prepare("UPDATE tienda_productos SET nombre=?, descripcion=?, precio=? WHERE id=?"); $stmt->bind_param("ssdi", $nombre, $descripcion, $precio, $id); }
-            $stmt->execute(); $mensaje = 'Producto actualizado.';
-        } else {
-            $stmt = $conn->prepare("INSERT INTO tienda_productos (nombre, descripcion, precio, imagen) VALUES (?, ?, ?, ?)");
-            $stmt->bind_param("ssds", $nombre, $descripcion, $precio, $imagen); $stmt->execute(); $mensaje = 'Producto creado.';
-        }
+    } elseif ($_POST['accion'] === 'quitar_imagen') {
+        $r = $conn->query("SELECT tienda_imagen FROM pos_productos WHERE id = $id");
+        if ($f = $r->fetch_assoc()) { if ($f['tienda_imagen'] && file_exists(__DIR__ . '/uploads/' . $f['tienda_imagen'])) unlink(__DIR__ . '/uploads/' . $f['tienda_imagen']); }
+        $conn->query("UPDATE pos_productos SET tienda_imagen = NULL WHERE id = $id");
+        $mensaje = 'Imagen eliminada.';
     }
 }
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion']) && $_POST['accion'] === 'eliminar') {
-    $id = (int)$_POST['id']; $r = $conn->query("SELECT imagen FROM tienda_productos WHERE id = $id");
-    if ($f = $r->fetch_assoc()) { if ($f['imagen'] && file_exists(__DIR__ . '/uploads/' . $f['imagen'])) unlink(__DIR__ . '/uploads/' . $f['imagen']); }
-    $conn->query("DELETE FROM tienda_productos WHERE id = $id"); $mensaje = 'Producto eliminado.';
-}
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion']) && $_POST['accion'] === 'toggle') {
-    $id = (int)$_POST['id']; $conn->query("UPDATE tienda_productos SET activo = NOT activo WHERE id = $id"); $mensaje = 'Estado cambiado.';
-}
 
-$productos = $conn->query("SELECT * FROM tienda_productos ORDER BY created_at DESC");
+$productos = $conn->query("SELECT id, codigo, descripcion AS nombre, precio, activo, visible_en_tienda, tienda_descripcion, tienda_imagen FROM pos_productos ORDER BY visible_en_tienda DESC, codigo ASC");
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -89,96 +70,112 @@ $productos = $conn->query("SELECT * FROM tienda_productos ORDER BY created_at DE
         .nav-top a:hover { color: white; }
         .card { border: none; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); margin-bottom: 16px; }
         .card-title { font-weight: 700; font-size: 0.9rem; color: #1a1a2e; border-bottom: 1px solid #e9ecef; padding-bottom: 8px; margin-bottom: 12px; }
-        .table th { font-weight: 600; font-size: 0.85rem; }
+        .table th { font-weight: 600; font-size: 0.85rem; border-top: none; }
+        .prod-img { width: 48px; height: 48px; object-fit: contain; border-radius: 8px; background: #f8f9fa; border: 1px solid #e9ecef; }
+        .tienda-on { border-left: 4px solid #198754; }
+        .tienda-off { border-left: 4px solid #dee2e6; opacity: 0.7; }
+        .toggle-btn { min-width: 72px; }
+        form.d-inline { display: inline; }
     </style>
 </head>
 <body>
 <div class="nav-top">
     <a href="../ordenes/listado.php"><i class="bi bi-arrow-left"></i></a>
-    <h5><i class="bi bi-shop me-2"></i>Tienda</h5>
+    <h5><i class="bi bi-shop me-2"></i>Tienda — Productos</h5>
+    <a href="index.php" class="btn btn-sm btn-outline-light" target="_blank"><i class="bi bi-box-arrow-up-right"></i></a>
 </div>
 <div class="container-fluid py-3">
-    <div class="row g-3">
-        <div class="col-lg-4">
-            <div class="card p-3">
-                <div class="card-title"><i class="bi bi-gear me-1"></i>Configuración</div>
-                <?php if ($mensaje): ?><div class="alert alert-success py-2"><?php echo htmlspecialchars($mensaje); ?></div><?php endif; ?>
-                <?php if ($error): ?><div class="alert alert-danger py-2"><?php echo htmlspecialchars($error); ?></div><?php endif; ?>
-                <form method="POST">
-                    <input type="hidden" name="accion" value="config">
-                    <div class="form-check form-switch mb-2">
-                        <input class="form-check-input" type="checkbox" name="seguimiento_activo" value="1" id="chk-seg" <?php echo ($config_s['seguimiento_activo'] ?? '1') === '1' ? 'checked' : ''; ?>>
-                        <label class="form-check-label" for="chk-seg">Seguimiento de órdenes</label>
-                        <small class="d-block text-muted">Permite a los clientes consultar el estado de su orden.</small>
-                    </div>
-                    <div class="form-check form-switch mb-3">
-                        <input class="form-check-input" type="checkbox" name="tienda_activa" value="1" id="chk-tienda" <?php echo ($config_s['tienda_activa'] ?? '0') === '1' ? 'checked' : ''; ?>>
-                        <label class="form-check-label" for="chk-tienda">Tienda de productos</label>
-                        <small class="d-block text-muted">Muestra productos en la página de seguimiento.</small>
-                    </div>
-                    <button class="btn btn-primary w-100"><i class="bi bi-check-lg"></i> Guardar</button>
-                </form>
-            </div>
-            <a href="index.php" class="btn btn-outline-secondary w-100" target="_blank"><i class="bi bi-box-arrow-up-right"></i> Ver página pública</a>
+    <?php if ($mensaje): ?><div class="alert alert-success py-2"><?php echo htmlspecialchars($mensaje); ?></div><?php endif; ?>
+    <?php if ($error): ?><div class="alert alert-danger py-2"><?php echo htmlspecialchars($error); ?></div><?php endif; ?>
+
+    <div class="card p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0 align-middle">
+                <thead class="table-light">
+                    <tr><th style="width:54px;"></th><th>Código</th><th>Nombre</th><th>Precio</th><th>Descripción tienda</th><th style="width:90px;">Visible</th><th style="width:80px;">Acción</th></tr>
+                </thead>
+                <tbody>
+                    <?php if ($productos && $productos->num_rows > 0): while ($p = $productos->fetch_assoc()): ?>
+                    <tr class="<?php echo $p['visible_en_tienda'] ? 'tienda-on' : 'tienda-off'; ?>">
+                        <td>
+                            <?php if ($p['tienda_imagen'] && file_exists("uploads/" . $p['tienda_imagen'])): ?>
+                            <img src="uploads/<?php echo htmlspecialchars($p['tienda_imagen']); ?>" class="prod-img" alt="">
+                            <?php else: ?>
+                            <div class="prod-img d-flex align-items-center justify-content-center"><i class="bi bi-box text-muted"></i></div>
+                            <?php endif; ?>
+                        </td>
+                        <td><code><?php echo htmlspecialchars($p['codigo']); ?></code></td>
+                        <td><strong><?php echo htmlspecialchars($p['nombre']); ?></strong></td>
+                        <td>$<?php echo number_format($p['precio'], 2); ?></td>
+                        <td><small class="text-muted"><?php echo htmlspecialchars(mb_substr($p['tienda_descripcion'] ?? '', 0, 60)); if (mb_strlen($p['tienda_descripcion'] ?? '') > 60) echo '...'; ?></small></td>
+                        <td>
+                            <form method="POST" class="d-inline">
+                                <input type="hidden" name="accion" value="toggle">
+                                <input type="hidden" name="id" value="<?php echo $p['id']; ?>">
+                                <button class="btn btn-sm toggle-btn <?php echo $p['visible_en_tienda'] ? 'btn-success' : 'btn-secondary'; ?>">
+                                    <?php echo $p['visible_en_tienda'] ? 'Sí' : 'No'; ?>
+                                </button>
+                            </form>
+                        </td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-primary" onclick="abrirModal(<?php echo $p['id']; ?>, '<?php echo htmlspecialchars($p['nombre'], ENT_QUOTES); ?>', '<?php echo htmlspecialchars($p['tienda_descripcion'] ?? '', ENT_QUOTES); ?>', <?php echo $p['precio']; ?>, '<?php echo htmlspecialchars($p['codigo'], ENT_QUOTES); ?>')"><i class="bi bi-pencil"></i></button>
+                        </td>
+                    </tr>
+                    <?php endwhile; else: ?>
+                    <tr><td colspan="7" class="text-center py-4 text-muted">No hay productos cargados en POS.</td></tr>
+                    <?php endif; ?>
+                </tbody>
+            </table>
         </div>
-        <div class="col-lg-8">
-            <div class="card">
-                <div class="card-body p-3">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h6 class="mb-0" style="font-weight:700;">Productos</h6>
-                        <button class="btn btn-primary btn-sm" onclick="abrirModal()"><i class="bi bi-plus-lg"></i> Nuevo</button>
-                    </div>
-                    <div class="table-responsive">
-                        <table class="table table-hover mb-0">
-                            <thead class="table-light"><tr><th style="width:50px;">Img</th><th>Nombre</th><th>Precio</th><th style="width:90px;">Activo</th><th style="width:100px;">Acciones</th></tr></thead>
-                            <tbody>
-                                <?php if ($productos && $productos->num_rows > 0): while ($p = $productos->fetch_assoc()): ?>
-                                <tr>
-                                    <td><?php if ($p['imagen'] && file_exists("uploads/" . $p['imagen'])): ?><img src="uploads/<?php echo htmlspecialchars($p['imagen']); ?>" style="width:40px;height:40px;object-fit:cover;border-radius:6px;"><?php else: ?><div style="width:40px;height:40px;background:#f0f2f5;border-radius:6px;display:flex;align-items:center;justify-content:center;"><i class="bi bi-box text-muted"></i></div><?php endif; ?></td>
-                                    <td><strong><?php echo htmlspecialchars($p['nombre']); ?></strong><?php if ($p['descripcion']): ?><br><small class="text-muted"><?php echo htmlspecialchars($p['descripcion']); ?></small><?php endif; ?></td>
-                                    <td>$<?php echo number_format($p['precio'], 2); ?></td>
-                                    <td><form method="POST" style="display:inline;"><input type="hidden" name="accion" value="toggle"><input type="hidden" name="id" value="<?php echo $p['id']; ?>"><button class="btn btn-sm <?php echo $p['activo'] ? 'btn-success' : 'btn-secondary'; ?>"><?php echo $p['activo'] ? 'Activo' : 'Inactivo'; ?></button></form></td>
-                                    <td>
-                                        <button class="btn btn-sm btn-outline-primary" onclick="abrirModal(<?php echo $p['id']; ?>, '<?php echo htmlspecialchars($p['nombre'], ENT_QUOTES); ?>', '<?php echo htmlspecialchars($p['descripcion'] ?? '', ENT_QUOTES); ?>', <?php echo $p['precio']; ?>)"><i class="bi bi-pencil"></i></button>
-                                        <form method="POST" style="display:inline;" onsubmit="return confirm('¿Eliminar producto?')"><input type="hidden" name="accion" value="eliminar"><input type="hidden" name="id" value="<?php echo $p['id']; ?>"><button class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button></form>
-                                    </td>
-                                </tr>
-                                <?php endwhile; else: ?>
-                                <tr><td colspan="5" class="text-center py-4 text-muted">No hay productos aún.</td></tr>
-                                <?php endif; ?>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
+    </div>
+    <div class="text-end mt-2">
+        <small class="text-muted">Los productos se administran desde <a href="../pos/productos.php">POS → Productos</a>. Acá solo definís visibilidad, descripción y foto para la tienda.</small>
     </div>
 </div>
 
 <div class="modal fade" id="modalProducto" tabindex="-1">
     <div class="modal-dialog">
         <form method="POST" enctype="multipart/form-data" class="modal-content">
-            <div class="modal-header"><h5 class="modal-title" id="modalTitle">Nuevo producto</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+            <div class="modal-header"><h5 class="modal-title">Editar producto para tienda</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
             <div class="modal-body">
-                <input type="hidden" name="accion" value="guardar"><input type="hidden" name="id" id="prod-id" value="0">
-                <div class="mb-3"><label class="form-label">Nombre *</label><input type="text" name="nombre" id="prod-nombre" class="form-control" required></div>
-                <div class="mb-3"><label class="form-label">Descripción</label><textarea name="descripcion" id="prod-desc" class="form-control" rows="2"></textarea></div>
-                <div class="mb-3"><label class="form-label">Precio *</label><input type="number" step="0.01" name="precio" id="prod-precio" class="form-control" required></div>
-                <div class="mb-3"><label class="form-label">Imagen</label><input type="file" name="imagen" class="form-control" accept="image/png,image/jpeg,image/webp"><small class="text-muted">Dejá vacío para mantener la actual.</small></div>
+                <input type="hidden" name="accion" value="guardar">
+                <input type="hidden" name="id" id="prod-id" value="0">
+                <div class="mb-2"><label class="form-label small">Código</label><input type="text" id="prod-codigo" class="form-control" disabled></div>
+                <div class="mb-2"><label class="form-label small">Nombre *</label><input type="text" name="nombre" id="prod-nombre" class="form-control" required></div>
+                <div class="mb-2"><label class="form-label small">Precio</label><input type="text" id="prod-precio" class="form-control" disabled></div>
+                <div class="mb-2"><label class="form-label small">Descripción para la tienda</label><textarea name="tienda_descripcion" id="prod-desc" class="form-control" rows="2" placeholder="Opcional: descripción que verá el cliente"></textarea></div>
+                <div class="mb-2">
+                    <label class="form-label small">Imagen para tienda</label>
+                    <input type="file" name="tienda_imagen" class="form-control" accept="image/png,image/jpeg,image/webp">
+                    <small class="text-muted">Dejá vacío para mantener la actual.</small>
+                    <div id="imagen-actual" class="mt-1" style="display:none;">
+                        <img src="" id="img-preview" style="max-width:120px;max-height:80px;border-radius:6px;border:1px solid #dee2e6;">
+                        <button type="submit" formaction="" name="accion" value="quitar_imagen" class="btn btn-sm btn-outline-danger ms-2" onclick="return confirm('¿Quitar imagen?')"><i class="bi bi-trash"></i></button>
+                    </div>
+                </div>
             </div>
-            <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button><button type="submit" class="btn btn-primary">Guardar</button></div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="submit" class="btn btn-primary"><i class="bi bi-check-lg"></i> Guardar</button>
+            </div>
         </form>
     </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-function abrirModal(id, nombre, desc, precio) {
-    document.getElementById('modalTitle').textContent = id ? 'Editar producto' : 'Nuevo producto';
+function abrirModal(id, nombre, desc, precio, codigo) {
     document.getElementById('prod-id').value = id || 0;
+    document.getElementById('prod-codigo').value = codigo || '';
     document.getElementById('prod-nombre').value = nombre || '';
+    document.getElementById('prod-precio').value = precio ? '$' + parseFloat(precio).toFixed(2) : '';
     document.getElementById('prod-desc').value = desc || '';
-    document.getElementById('prod-precio').value = precio || '';
+    // Mostrar preview de imagen si existe
+    const imgDiv = document.getElementById('imagen-actual');
+    const imgPreview = document.getElementById('img-preview');
+    const imgSrc = 'uploads/prod_' + id + '_';
+    // We can't know the exact filename, so just hide for now
+    imgDiv.style.display = 'none';
     new bootstrap.Modal(document.getElementById('modalProducto')).show();
 }
 </script>

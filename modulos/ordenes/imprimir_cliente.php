@@ -39,9 +39,8 @@ if (!$orden) {
 $protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http';
 $host_i = $_SERVER['HTTP_HOST'];
 $token_i = $orden['token'] ?? '';
-$seg_i = $config_imp['seguimiento_activo'] ?? '1';
-$tie_i = $config_imp['tienda_activa'] ?? '0';
-if ($seg_i === '1' && $tie_i === '1') {
+$tiene_tienda_i = strpos($GLOBALS['taller_modulos'] ?? '', 'tienda') !== false;
+if ($tiene_tienda_i) {
     $tracking_url = "$protocol://$host_i/modulos/tienda/?token=$token_i";
 } else {
     $tracking_url = "$protocol://$host_i/seguimiento.php?token=$token_i";

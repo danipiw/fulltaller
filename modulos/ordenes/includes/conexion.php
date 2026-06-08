@@ -46,7 +46,7 @@ if (empty($subdominio)) {
 require_once __DIR__ . '/conexion_central.php';
 
 $subdominio_escaped = $conn_central->real_escape_string($subdominio);
-$result = $conn_central->query("SELECT id, nombre, db_host, db_user, db_pass, db_name, suscripcion_activa, fecha_vencimiento, activo FROM talleres WHERE subdominio = '$subdominio_escaped' LIMIT 1");
+$result = $conn_central->query("SELECT id, nombre, db_host, db_user, db_pass, db_name, modulos, suscripcion_activa, fecha_vencimiento, activo FROM talleres WHERE subdominio = '$subdominio_escaped' LIMIT 1");
 $taller = $result->fetch_assoc();
 
 if (!$taller) {
@@ -65,6 +65,7 @@ if (!$taller['suscripcion_activa'] || strtotime($taller['fecha_vencimiento']) < 
 $GLOBALS['taller_id'] = (int)$taller['id'];
 $GLOBALS['taller_nombre'] = $taller['nombre'];
 $GLOBALS['taller_subdominio'] = $subdominio;
+$GLOBALS['taller_modulos'] = $taller['modulos'] ?? '';
 $GLOBALS['taller_db_host'] = $taller['db_host'];
 $GLOBALS['taller_db_user'] = $taller['db_user'];
 $GLOBALS['taller_db_pass'] = $taller['db_pass'];
