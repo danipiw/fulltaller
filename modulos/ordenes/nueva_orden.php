@@ -2,6 +2,21 @@
 
 include 'includes/verificar_sesion.php';
 
+// Determinar URL de seguimiento según config
+$cfg_t_n = $conn->query("SELECT clave, valor FROM configuracion WHERE clave IN ('seguimiento_activo','tienda_activa')");
+$seg_act = '1'; $tie_act = '0';
+while ($r_n = $cfg_t_n->fetch_assoc()) {
+    if ($r_n['clave'] === 'seguimiento_activo') $seg_act = $r_n['valor'];
+    if ($r_n['clave'] === 'tienda_activa') $tie_act = $r_n['valor'];
+}
+$protocol_n = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http';
+$host_n = $_SERVER['HTTP_HOST'];
+if ($seg_act === '1' && $tie_act === '1') {
+    $tracking_base_n = "$protocol_n://$host_n/modulos/tienda/?token=";
+} else {
+    $tracking_base_n = "$protocol_n://$host_n/seguimiento.php?token=";
+}
+
 $clientes = $conn->query(
     "SELECT * FROM clientes ORDER BY nombre ASC"
 );
@@ -549,6 +564,12 @@ if ($cfg_ord && $cfg_ord->num_rows > 0) {
                 <i class="bi bi-gear"></i>
                 <span>Configuración</span>
             </a>
+            <?php if ($ES_ADMIN): ?>
+            <a href="../tienda/admin.php" class="sidebar-menu-item">
+                <i class="bi bi-shop"></i>
+                <span>Tienda</span>
+            </a>
+            <?php endif; ?>
         </div>
 
         <!-- Spacer to push dark mode to bottom -->
@@ -915,6 +936,7 @@ if(formTipo) {
 }
 </script>
 <script>
+var trackingBaseUrl = '<?php echo $tracking_base_n; ?>';
 var ultimaOrdenId = null;
 var ultimoTelefono = '';
 var ultimoToken = '';
@@ -961,7 +983,7 @@ function enviarWhatsAppSeguimiento() {
         mostrarMensaje('El cliente no tiene teléfono o token', 'danger');
         return;
     }
-    var url = window.location.protocol + '//' + window.location.host + '/seguimiento.php?token=' + ultimoToken;
+    var url = trackingBaseUrl + ultimoToken;
     var msg = 'Segu\u00ed el estado de tu orden #' + ultimaOrdenId + ' ac\u00e1: ' + url;
     window.open('whatsapp://send?phone=54' + ultimoTelefono + '&text=' + encodeURIComponent(msg), '_blank');
     bootstrap.Modal.getInstance(document.getElementById('modalSeguimiento')).hide();

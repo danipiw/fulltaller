@@ -19,6 +19,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $modulos = [];
     if (!empty($_POST['mod_ordenes'])) $modulos[] = 'ordenes';
     if (!empty($_POST['mod_pos'])) $modulos[] = 'pos';
+    if (!empty($_POST['mod_inventario'])) $modulos[] = 'inventario';
+    if (!empty($_POST['mod_finanzas'])) $modulos[] = 'finanzas';
+    if (!empty($_POST['mod_tienda'])) $modulos[] = 'tienda';
     $modulos_str = implode(',', $modulos);
     if (empty($modulos_str)) $modulos_str = 'ordenes';
 
@@ -117,7 +120,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     </div>
                     <div class="col-12">
                         <label class="form-label">Módulos habilitados</label>
-                        <div class="d-flex gap-4">
+                        <div class="d-flex gap-4 flex-wrap">
                             <div class="form-check">
                                 <input class="form-check-input" type="checkbox" name="mod_ordenes" value="1" id="mod_ordenes" checked>
                                 <label class="form-check-label" for="mod_ordenes">Órdenes</label>
@@ -125,6 +128,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             <div class="form-check">
                                 <input class="form-check-input" type="checkbox" name="mod_pos" value="1" id="mod_pos" checked>
                                 <label class="form-check-label" for="mod_pos">POS</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="mod_inventario" value="1" id="mod_inventario" checked>
+                                <label class="form-check-label" for="mod_inventario">Inventario</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="mod_finanzas" value="1" id="mod_finanzas">
+                                <label class="form-check-label" for="mod_finanzas">Finanzas</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="mod_tienda" value="1" id="mod_tienda">
+                                <label class="form-check-label" for="mod_tienda">Tienda</label>
                             </div>
                         </div>
                     </div>

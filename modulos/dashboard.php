@@ -116,7 +116,15 @@ $rol = $_SESSION['rol'];
         </a>
         <?php endif; ?>
 
-        <?php if (!array_intersect(['ordenes', 'pos', 'inventario', 'finanzas'], $modulos)): ?>
+        <?php if (in_array('tienda', $modulos)): ?>
+        <a href="tienda/admin.php" class="module-card" target="_blank">
+            <div class="icon"><i class="bi bi-shop"></i></div>
+            <div class="name">Tienda</div>
+            <div class="desc">Productos y seguimiento para clientes</div>
+        </a>
+        <?php endif; ?>
+
+        <?php if (!array_intersect(['ordenes', 'pos', 'inventario', 'finanzas', 'tienda'], $modulos)): ?>
         <div class="module-card" style="grid-column:1/-1;cursor:default;opacity:0.6;">
             <div class="icon"><i class="bi bi-shield-exclamation"></i></div>
             <div class="name">Sin acceso</div>

@@ -871,8 +871,11 @@ function badgeClass($estado) {
                 <i class="bi bi-gear"></i>
                 <span>Configuración</span>
             </a>
-
             <?php if ($ES_ADMIN): ?>
+            <a href="../tienda/admin.php" class="sidebar-menu-item">
+                <i class="bi bi-shop"></i>
+                <span>Tienda</span>
+            </a>
             <hr class="sidebar-divider">
             <a href="?cambiar_vista=recepcion" class="sidebar-menu-item <?php echo $VISTA_ADMIN === 'recepcion' ? 'active' : ''; ?>">
                 <i class="bi bi-headset"></i>

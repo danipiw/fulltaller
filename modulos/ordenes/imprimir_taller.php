@@ -37,7 +37,15 @@ if (!$orden) {
 }
 
 $protocol_t = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http';
-$tracking_url_t = $protocol_t . '://' . $_SERVER['HTTP_HOST'] . '/seguimiento.php?token=' . ($orden['token'] ?? '');
+$host_t = $_SERVER['HTTP_HOST'];
+$token_t = $orden['token'] ?? '';
+$seg_t = $config_imp_t['seguimiento_activo'] ?? '1';
+$tie_t = $config_imp_t['tienda_activa'] ?? '0';
+if ($seg_t === '1' && $tie_t === '1') {
+    $tracking_url_t = "$protocol_t://$host_t/modulos/tienda/?token=$token_t";
+} else {
+    $tracking_url_t = "$protocol_t://$host_t/seguimiento.php?token=$token_t";
+}
 
 ?>
 

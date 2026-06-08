@@ -28,7 +28,21 @@ if (!$orden) {
 }
 
 $protocol_d = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http';
-$tracking_url_d = $protocol_d . '://' . $_SERVER['HTTP_HOST'] . '/seguimiento.php?token=' . ($orden['token'] ?? '');
+$host_d = $_SERVER['HTTP_HOST'];
+$token_d = $orden['token'] ?? '';
+
+// Determinar URL de seguimiento según config
+$cfg_tracking = $conn->query("SELECT clave, valor FROM configuracion WHERE clave IN ('seguimiento_activo','tienda_activa','taller_nombre')");
+$seguimiento_activo_d = '1'; $tienda_activa_d = '0';
+while ($r = $cfg_tracking->fetch_assoc()) {
+    if ($r['clave'] === 'seguimiento_activo') $seguimiento_activo_d = $r['valor'];
+    if ($r['clave'] === 'tienda_activa') $tienda_activa_d = $r['valor'];
+}
+if ($seguimiento_activo_d === '1' && $tienda_activa_d === '1') {
+    $tracking_url_d = "$protocol_d://$host_d/modulos/tienda/?token=$token_d";
+} else {
+    $tracking_url_d = "$protocol_d://$host_d/seguimiento.php?token=$token_d";
+}
 $cfg_result_w = $conn->query("SELECT clave, valor FROM configuracion WHERE clave IN ('taller_nombre')");
 $taller_nombre_w = 'FullTaller';
 if ($cfg_result_w) {
@@ -617,6 +631,12 @@ while ($f = $result_fotos->fetch_assoc()) {
                 <i class="bi bi-gear"></i>
                 <span>Configuración</span>
             </a>
+            <?php if ($ES_ADMIN): ?>
+            <a href="../tienda/admin.php" class="sidebar-menu-item">
+                <i class="bi bi-shop"></i>
+                <span>Tienda</span>
+            </a>
+            <?php endif; ?>
         </div>
 
         <!-- Spacer to push dark mode to bottom -->

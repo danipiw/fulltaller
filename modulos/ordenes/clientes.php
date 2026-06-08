@@ -241,6 +241,12 @@ if (isset($_GET['editar']) && is_numeric($_GET['editar'])) {
                 <i class="bi bi-gear"></i>
                 <span>Configuración</span>
             </a>
+            <?php if ($ES_ADMIN): ?>
+            <a href="../tienda/admin.php" class="sidebar-menu-item">
+                <i class="bi bi-shop"></i>
+                <span>Tienda</span>
+            </a>
+            <?php endif; ?>
         </div>
 
         <!-- Spacer to push dark mode to bottom -->

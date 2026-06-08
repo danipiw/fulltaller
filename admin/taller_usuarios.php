@@ -39,6 +39,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (!empty($_POST['mod_pos'])) $modulos[] = 'pos';
         if (!empty($_POST['mod_inventario'])) $modulos[] = 'inventario';
         if (!empty($_POST['mod_finanzas'])) $modulos[] = 'finanzas';
+        if (!empty($_POST['mod_tienda'])) $modulos[] = 'tienda';
         $modulos_str = implode(',', $modulos);
         if (empty($modulos_str)) $modulos_str = 'ordenes';
 
@@ -64,6 +65,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (!empty($_POST['mod_pos'])) $mods[] = 'pos';
         if (!empty($_POST['mod_inventario'])) $mods[] = 'inventario';
         if (!empty($_POST['mod_finanzas'])) $mods[] = 'finanzas';
+        if (!empty($_POST['mod_tienda'])) $mods[] = 'tienda';
         $mods_str = implode(',', $mods);
         if (empty($mods_str)) $mods_str = 'ordenes';
         $conn_taller->query("UPDATE usuarios SET modulos = '$mods_str' WHERE id = $uid");
@@ -191,6 +193,10 @@ $usuarios = $conn_taller->query("SELECT * FROM usuarios ORDER BY id ASC");
                                 <div class="form-check">
                                     <input class="form-check-input" type="checkbox" name="mod_finanzas" value="1" id="nu_mod_fin">
                                     <label class="form-check-label small" for="nu_mod_fin">Finanzas</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="mod_tienda" value="1" id="nu_mod_tienda">
+                                    <label class="form-check-label small" for="nu_mod_tienda">Tienda</label>
                                 </div>
                             </div>
                         </div>
@@ -328,6 +334,7 @@ $usuarios = $conn_taller->query("SELECT * FROM usuarios ORDER BY id ASC");
                     <input type="hidden" name="mod_pos" id="f_em_pos" value="1" disabled>
                     <input type="hidden" name="mod_inventario" id="f_em_inv" value="1" disabled>
                     <input type="hidden" name="mod_finanzas" id="f_em_fin" value="1" disabled>
+                    <input type="hidden" name="mod_tienda" id="f_em_tienda" value="1" disabled>
                     <div class="d-flex flex-column gap-2">
                         <div class="form-check">
                             <input class="form-check-input" type="checkbox" id="em_ordenes">
@@ -344,6 +351,10 @@ $usuarios = $conn_taller->query("SELECT * FROM usuarios ORDER BY id ASC");
                         <div class="form-check">
                             <input class="form-check-input" type="checkbox" id="em_fin">
                             <label class="form-check-label" for="em_fin">Finanzas</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="em_tienda">
+                            <label class="form-check-label" for="em_tienda">Tienda</label>
                         </div>
                     </div>
                 </div>
@@ -363,13 +374,15 @@ function editarModulos(id, usuario, modulosActuales) {
         ordenes: modulosActuales.includes('ordenes'),
         pos: modulosActuales.includes('pos'),
         inventario: modulosActuales.includes('inventario'),
-        finanzas: modulosActuales.includes('finanzas')
+        finanzas: modulosActuales.includes('finanzas'),
+        tienda: modulosActuales.includes('tienda')
     };
     document.getElementById('em_user_name').textContent = usuario;
     document.getElementById('em_ordenes').checked = tiene.ordenes;
     document.getElementById('em_pos').checked = tiene.pos;
     document.getElementById('em_inv').checked = tiene.inventario;
     document.getElementById('em_fin').checked = tiene.finanzas;
+    document.getElementById('em_tienda').checked = tiene.tienda;
     document.getElementById('em_user_id').value = id;
     new bootstrap.Modal(document.getElementById('modalEditarModulos')).show();
 }
@@ -379,6 +392,7 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('f_em_pos').disabled = !document.getElementById('em_pos').checked;
         document.getElementById('f_em_inv').disabled = !document.getElementById('em_inv').checked;
         document.getElementById('f_em_fin').disabled = !document.getElementById('em_fin').checked;
+        document.getElementById('f_em_tienda').disabled = !document.getElementById('em_tienda').checked;
     });
 });
 
