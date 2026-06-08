@@ -2,9 +2,12 @@
 require_once __DIR__ . '/includes/conexion.php';
 
 // Asegurar columnas en pos_productos
-$conn->query("ALTER TABLE pos_productos ADD COLUMN IF NOT EXISTS visible_en_tienda TINYINT DEFAULT 0");
-$conn->query("ALTER TABLE pos_productos ADD COLUMN IF NOT EXISTS tienda_descripcion TEXT DEFAULT NULL");
-$conn->query("ALTER TABLE pos_productos ADD COLUMN IF NOT EXISTS tienda_imagen VARCHAR(255) DEFAULT NULL");
+$cols = $conn->query("SHOW COLUMNS FROM pos_productos LIKE 'visible_en_tienda'");
+if ($cols->num_rows === 0) {
+    $conn->query("ALTER TABLE pos_productos ADD COLUMN visible_en_tienda TINYINT DEFAULT 0");
+    $conn->query("ALTER TABLE pos_productos ADD COLUMN tienda_descripcion TEXT DEFAULT NULL");
+    $conn->query("ALTER TABLE pos_productos ADD COLUMN tienda_imagen VARCHAR(255) DEFAULT NULL");
+}
 
 $config_s = [];
 $r_s = $conn->query("SELECT clave, valor FROM configuracion");
