@@ -53,7 +53,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $m = $conn_taller->real_escape_string($modulos_str);
 
             if ($conn_taller->query("INSERT INTO usuarios (usuario, password, nombre, rol, modulos) VALUES ('$u', '$hash', '$n', '$r', '$m')")) {
-                $mensaje = "Usuario <strong>$usuario</strong> creado correctamente";
+                $mensaje = "Usuario <strong>" . htmlspecialchars($usuario) . "</strong> creado correctamente";
             } else {
                 $error = 'Error: ' . $conn_taller->error;
             }

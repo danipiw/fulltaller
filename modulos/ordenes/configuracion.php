@@ -41,19 +41,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $estados_tecnico = $conn->real_escape_string(implode(', ', $nombres_tec));
     $tipo_impresion = $conn->real_escape_string($_POST['tipo_impresion'] ?? 'dos_vias');
 
-    $conn->query("INSERT INTO configuracion (clave, valor) VALUES ('taller_nombre', '$taller_nombre') ON DUPLICATE KEY UPDATE valor = '$taller_nombre'");
-    $conn->query("INSERT INTO configuracion (clave, valor) VALUES ('taller_direccion', '$taller_direccion') ON DUPLICATE KEY UPDATE valor = '$taller_direccion'");
-    $conn->query("INSERT INTO configuracion (clave, valor) VALUES ('taller_telefono', '$taller_telefono') ON DUPLICATE KEY UPDATE valor = '$taller_telefono'");
-    $conn->query("INSERT INTO configuracion (clave, valor) VALUES ('legal_terminos', '$legal_terminos') ON DUPLICATE KEY UPDATE valor = '$legal_terminos'");
-    $conn->query("INSERT INTO configuracion (clave, valor) VALUES ('estados_recepcion', '$estados_recepcion') ON DUPLICATE KEY UPDATE valor = '$estados_recepcion'");
-    $conn->query("INSERT INTO configuracion (clave, valor) VALUES ('estados_tecnico', '$estados_tecnico') ON DUPLICATE KEY UPDATE valor = '$estados_tecnico'");
-    $conn->query("INSERT INTO configuracion (clave, valor) VALUES ('tipo_impresion', '$tipo_impresion') ON DUPLICATE KEY UPDATE valor = '$tipo_impresion'");
+    $conn->begin_transaction();
+    $ok = $conn->query("INSERT INTO configuracion (clave, valor) VALUES ('taller_nombre', '$taller_nombre') ON DUPLICATE KEY UPDATE valor = '$taller_nombre'");
+    $ok = $ok && $conn->query("INSERT INTO configuracion (clave, valor) VALUES ('taller_direccion', '$taller_direccion') ON DUPLICATE KEY UPDATE valor = '$taller_direccion'");
+    $ok = $ok && $conn->query("INSERT INTO configuracion (clave, valor) VALUES ('taller_telefono', '$taller_telefono') ON DUPLICATE KEY UPDATE valor = '$taller_telefono'");
+    $ok = $ok && $conn->query("INSERT INTO configuracion (clave, valor) VALUES ('legal_terminos', '$legal_terminos') ON DUPLICATE KEY UPDATE valor = '$legal_terminos'");
+    $ok = $ok && $conn->query("INSERT INTO configuracion (clave, valor) VALUES ('estados_recepcion', '$estados_recepcion') ON DUPLICATE KEY UPDATE valor = '$estados_recepcion'");
+    $ok = $ok && $conn->query("INSERT INTO configuracion (clave, valor) VALUES ('estados_tecnico', '$estados_tecnico') ON DUPLICATE KEY UPDATE valor = '$estados_tecnico'");
+    $ok = $ok && $conn->query("INSERT INTO configuracion (clave, valor) VALUES ('tipo_impresion', '$tipo_impresion') ON DUPLICATE KEY UPDATE valor = '$tipo_impresion'");
     $logo_val = $logo_subido ? '1' : ($config['logo_ordenes'] ?? '');
-    $conn->query("INSERT INTO configuracion (clave, valor) VALUES ('logo_ordenes', '$logo_val') ON DUPLICATE KEY UPDATE valor = '$logo_val'");
+    $ok = $ok && $conn->query("INSERT INTO configuracion (clave, valor) VALUES ('logo_ordenes', '$logo_val') ON DUPLICATE KEY UPDATE valor = '$logo_val'");
 
-    if ($conn->error) {
-        $error = 'Error al guardar: ' . $conn->error;
-    } else {
+    if ($ok) {
+        $conn->commit();
         $mensaje = 'Configuración guardada correctamente.';
         $config['taller_nombre'] = $taller_nombre;
         $config['taller_direccion'] = $taller_direccion;
@@ -63,6 +63,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $config['estados_tecnico'] = $estados_tecnico;
         $config['tipo_impresion'] = $tipo_impresion;
         if ($logo_subido) $config['logo_ordenes'] = '1';
+    } else {
+        $conn->rollback();
+        $error = 'Error al guardar: ' . $conn->error;
     }
 }
 ?>
@@ -105,7 +108,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <div class="alert alert-success py-2" style="font-size:0.9rem;"><?php echo $mensaje; ?></div>
     <?php endif; ?>
     <?php if ($error): ?>
-    <div class="alert alert-danger py-2" style="font-size:0.9rem;"><?php echo $error; ?></div>
+    <div class="alert alert-danger py-2" style="font-size:0.9rem;"><?php echo htmlspecialchars($error); ?></div>
     <?php endif; ?>
 
     <?php

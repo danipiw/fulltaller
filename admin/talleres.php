@@ -5,25 +5,63 @@ if (!isset($_SESSION['admin_id'])) {
     exit;
 }
 require_once __DIR__ . '/../includes/conexion_central.php';
+require_once __DIR__ . '/includes/verificar_token_admin.php';
+verificar_csrf_token();
+
+// Ensure pagos_talleres table exists
+$conn_central->query("CREATE TABLE IF NOT EXISTS `pagos_talleres` (
+  `id` INT AUTO_INCREMENT PRIMARY KEY,
+  `taller_id` INT NOT NULL,
+  `meses` TINYINT NOT NULL DEFAULT 1,
+  `hasta` DATE NOT NULL,
+  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (`taller_id`) REFERENCES `talleres`(`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci");
+
+
 
 $mensaje = '';
 $error = '';
 
-if (isset($_GET['accion']) && isset($_GET['id'])) {
-    $id = (int)$_GET['id'];
-    if ($_GET['accion'] === 'desactivar') {
+// Handle register payment
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['registrar_pago'])) {
+    $taller_id = (int)$_POST['taller_id'];
+    $meses = max(1, (int)$_POST['meses']);
+
+    $t = $conn_central->query("SELECT * FROM talleres WHERE id = $taller_id")->fetch_assoc();
+    if ($t) {
+        $dia_facturacion = (int)date('j', strtotime($t['fecha_alta']));
+        $actual = $t['fecha_vencimiento'] ?? $t['fecha_alta'];
+        // If expired or never paid, start from today
+        $venc_ts = strtotime($actual);
+        if (!$actual || $venc_ts < time()) {
+            $actual = date('Y-m-d');
+        }
+        $dt = new DateTime($actual);
+        $dt->modify("+$meses months");
+        $ultimo_dia = (int)$dt->format('t');
+        $dia = min($dia_facturacion, $ultimo_dia);
+        $dt->setDate((int)$dt->format('Y'), (int)$dt->format('m'), $dia);
+        $hasta = $dt->format('Y-m-d');
+
+        $conn_central->query("UPDATE talleres SET fecha_vencimiento = '$hasta' WHERE id = $taller_id");
+        $conn_central->query("INSERT INTO pagos_talleres (taller_id, meses, hasta) VALUES ($taller_id, $meses, '$hasta')");
+        $mensaje = 'Pago registrado correctamente. Vence el ' . date('d/m/Y', strtotime($hasta));
+    } else {
+        $error = 'Taller no encontrado';
+    }
+}
+
+$accion = $_POST['accion'] ?? '';
+$id = isset($_POST['id']) ? (int)$_POST['id'] : 0;
+if ($accion && $id > 0) {
+    if ($accion === 'desactivar') {
         $conn_central->query("UPDATE talleres SET activo = 0 WHERE id = $id");
         $mensaje = 'Taller desactivado correctamente';
-    } elseif ($_GET['accion'] === 'activar') {
+    } elseif ($accion === 'activar') {
         $conn_central->query("UPDATE talleres SET activo = 1 WHERE id = $id");
         $mensaje = 'Taller activado correctamente';
-    } elseif ($_GET['accion'] === 'suspender') {
-        $conn_central->query("UPDATE talleres SET suscripcion_activa = 0 WHERE id = $id");
-        $mensaje = 'Suscripción suspendida';
-    } elseif ($_GET['accion'] === 'reactivar_suscripcion') {
-        $conn_central->query("UPDATE talleres SET suscripcion_activa = 1 WHERE id = $id");
-        $mensaje = 'Suscripción reactivada';
-    } elseif ($_GET['accion'] === 'eliminar') {
+    } elseif ($accion === 'eliminar') {
         $t = $conn_central->query("SELECT subdominio, db_name FROM talleres WHERE id = $id")->fetch_assoc();
         if ($t) {
             $conn_central->query("DELETE FROM talleres WHERE id = $id");
@@ -33,6 +71,7 @@ if (isset($_GET['accion']) && isset($_GET['id'])) {
 }
 
 $talleres = $conn_central->query("SELECT * FROM talleres ORDER BY id DESC");
+$hoy = date('Y-m-d');
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -75,7 +114,6 @@ $talleres = $conn_central->query("SELECT * FROM talleres ORDER BY id DESC");
         <div class="d-flex justify-content-between align-items-center mb-3">
             <h5 class="m-0" style="color:var(--jb-navy);font-weight:700;">Talleres</h5>
             <a href="taller_nuevo.php" class="btn btn-success"><i class="bi bi-plus-lg"></i> Nuevo Taller</a>
-            <a href="importar_csv.php" class="btn btn-info"><i class="bi bi-upload"></i> Importar CSV</a>
             <a href="actualizar.php" class="btn btn-secondary"><i class="bi bi-arrow-repeat"></i> Actualizar</a>
         </div>
 
@@ -90,7 +128,7 @@ $talleres = $conn_central->query("SELECT * FROM talleres ORDER BY id DESC");
                                 <th>Subdominio</th>
                                 <th>Módulos</th>
                                 <th>Licencia</th>
-                                <th>Vencimiento</th>
+                                <th>Pagos</th>
                                 <th>Estado</th>
                                 <th>Acciones</th>
                             </tr>
@@ -112,37 +150,51 @@ $talleres = $conn_central->query("SELECT * FROM talleres ORDER BY id DESC");
                                     <?php endforeach; ?>
                                 </td>
                                 <td><code style="font-size:0.7rem;"><?php echo htmlspecialchars($t['license_key']); ?></code></td>
-                                <td><?php echo date('d/m/Y', strtotime($t['fecha_vencimiento'])); ?></td>
                                 <td style="white-space:nowrap;">
+                                    <?php
+                                    $venc_ts = strtotime($t['fecha_vencimiento']);
+                                    if ($venc_ts && $venc_ts >= strtotime($hoy)):
+                                    ?>
+                                        <span class="badge bg-success">Al día</span>
+                                        <small style="font-size:0.7rem;color:#64748b;display:block;">Vence <?php echo date('d/m/Y', $venc_ts); ?></small>
+                                    <?php else: ?>
+                                        <span class="badge bg-danger">Vencido</span>
+                                        <small style="font-size:0.7rem;color:#64748b;display:block;"><?php echo $t['fecha_vencimiento'] ? 'Vencía ' . date('d/m/Y', $venc_ts) : 'Sin pagos'; ?></small>
+                                    <?php endif; ?>
+                                </td>
+                                <td>
                                     <?php if ($t['activo']): ?>
                                         <span class="badge badge-activo">Activo</span>
                                     <?php else: ?>
                                         <span class="badge badge-inactivo">Inactivo</span>
                                     <?php endif; ?>
-                                    <?php if ($t['suscripcion_activa']): ?>
-                                        <span class="badge bg-success">Suscrito</span>
-                                    <?php else: ?>
-                                        <span class="badge bg-danger">Vencido</span>
-                                    <?php endif; ?>
                                 </td>
                                 <td class="acciones" style="white-space:nowrap;">
                                     <a href="taller_editar.php?id=<?php echo $t['id']; ?>" class="btn btn-primary btn-sm" title="Editar"><i class="bi bi-pencil"></i></a>
                                     <a href="taller_usuarios.php?id=<?php echo $t['id']; ?>" class="btn btn-secondary btn-sm" title="Usuarios"><i class="bi bi-people"></i></a>
+                                    <button type="button" class="btn btn-success btn-sm" title="Registrar pago" onclick="abrirPago(<?php echo $t['id']; ?>, '<?php echo htmlspecialchars(addslashes($t['nombre'])); ?>')"><i class="bi bi-cash"></i></button>
                                     <?php if ($t['activo']): ?>
-                                        <a href="?accion=desactivar&id=<?php echo $t['id']; ?>" class="btn btn-warning btn-sm" title="Desactivar" onclick="return confirm('¿Desactivar este taller?')"><i class="bi bi-pause-circle"></i></a>
+                                        <form method="POST" style="display:inline;" onsubmit="return confirm('¿Desactivar este taller?')">
+                                            <?php echo csrf_token_field(); ?>
+                                            <input type="hidden" name="accion" value="desactivar">
+                                            <input type="hidden" name="id" value="<?php echo $t['id']; ?>">
+                                            <button type="submit" class="btn btn-warning btn-sm" title="Desactivar"><i class="bi bi-pause-circle"></i></button>
+                                        </form>
                                     <?php else: ?>
-                                        <a href="?accion=activar&id=<?php echo $t['id']; ?>" class="btn btn-success btn-sm" title="Activar"><i class="bi bi-play-circle"></i></a>
+                                        <form method="POST" style="display:inline;">
+                                            <?php echo csrf_token_field(); ?>
+                                            <input type="hidden" name="accion" value="activar">
+                                            <input type="hidden" name="id" value="<?php echo $t['id']; ?>">
+                                            <button type="submit" class="btn btn-success btn-sm" title="Activar"><i class="bi bi-play-circle"></i></button>
+                                        </form>
                                     <?php endif; ?>
-                                    <?php if ($t['suscripcion_activa']): ?>
-                                        <a href="?accion=suspender&id=<?php echo $t['id']; ?>" class="btn btn-danger btn-sm ms-1" title="Suspender suscripción" onclick="return confirm('¿Suspender suscripción?')"><i class="bi bi-x-circle"></i></a>
-                                    <?php else: ?>
-                                        <a href="?accion=reactivar_suscripcion&id=<?php echo $t['id']; ?>" class="btn btn-success btn-sm ms-1" title="Reactivar suscripción"><i class="bi bi-check-circle"></i></a>
-                                    <?php endif; ?>
-                                    <div class="btn-group ms-1">
-                                        <a href="taller_exportar.php?id=<?php echo $t['id']; ?>" class="btn btn-info btn-sm" title="Exportar BD"><i class="bi bi-download"></i></a>
-                                        <a href="taller_exportar.php?id=<?php echo $t['id']; ?>&pos=1" class="btn btn-outline-info btn-sm" title="Exportar BD POS"><i class="bi bi-cart"></i></a>
-                                    </div>
-                                    <a href="?accion=eliminar&id=<?php echo $t['id']; ?>" class="btn btn-danger btn-sm ms-1" title="Eliminar" onclick="return confirm('¿Eliminar este taller? No borra la base de datos.')"><i class="bi bi-trash"></i></a>
+                                    <a href="taller_exportar.php?id=<?php echo $t['id']; ?>" class="btn btn-info btn-sm ms-1" title="Exportar BD completa"><i class="bi bi-download"></i></a>
+                                    <form method="POST" style="display:inline;" onsubmit="return confirm('¿Eliminar este taller? No borra la base de datos.')">
+                                        <?php echo csrf_token_field(); ?>
+                                        <input type="hidden" name="accion" value="eliminar">
+                                        <input type="hidden" name="id" value="<?php echo $t['id']; ?>">
+                                        <button type="submit" class="btn btn-danger btn-sm ms-1" title="Eliminar"><i class="bi bi-trash"></i></button>
+                                    </form>
                                 </td>
                             </tr>
                             <?php endwhile; ?>
@@ -152,5 +204,40 @@ $talleres = $conn_central->query("SELECT * FROM talleres ORDER BY id DESC");
             </div>
         </div>
     </div>
+
+    <!-- Payment Modal -->
+    <div class="modal fade" id="pagoModal" tabindex="-1">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <form method="post">
+                    <div class="modal-header">
+                        <h6 class="modal-title">Registrar pago</h6>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <input type="hidden" name="taller_id" id="pago_taller_id">
+                        <p class="mb-2" id="pago_taller_nombre"></p>
+                        <div class="mb-2">
+                            <label class="form-label small">Meses a abonar</label>
+                            <input type="number" name="meses" class="form-control" value="1" min="1" max="12" required>
+                        </div>
+                        <div class="small text-muted">El vencimiento se calcula según el día de facturación del taller.</div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" name="registrar_pago" class="btn btn-success w-100">Registrar pago</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+    function abrirPago(id, nombre) {
+        document.getElementById('pago_taller_id').value = id;
+        document.getElementById('pago_taller_nombre').textContent = nombre;
+        new bootstrap.Modal(document.getElementById('pagoModal')).show();
+    }
+    </script>
 </body>
 </html>

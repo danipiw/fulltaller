@@ -215,7 +215,7 @@ $cajeros = $db->query("SELECT id, nombre FROM usuarios WHERE activo=1 ORDER BY n
                         if ($anulada) {
                             echo '❌ Anulada';
                         } else {
-                            echo ($iconos[$v['metodo_pago']] ?? '💵') . ' ' . ucfirst($v['metodo_pago']);
+                            echo ($iconos[$v['metodo_pago']] ?? '💵') . ' ' . htmlspecialchars(ucfirst($v['metodo_pago']));
                         }
                         ?>
                     </td>
@@ -260,7 +260,11 @@ updateDarkModeIcon();
 
 function anularVenta(id) {
     if (!confirm('¿Anular esta venta? Se restaurará el stock de los productos.')) return;
-    fetch('api.php?action=anular&id=' + id)
+    fetch('api.php', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+        body: 'action=anular&id=' + id + '&api_token=' + encodeURIComponent(window.API_TOKEN || '')
+    })
         .then(r => r.json())
         .then(data => {
             if (data.success) {

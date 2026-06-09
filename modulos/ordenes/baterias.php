@@ -222,6 +222,7 @@ include 'includes/verificar_sesion.php';
 </div>
 
 <script>
+function escHtml(s) { return String(s).replace(/[&<>"']/g, function(c) { return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
 let modelosCache = {};
 let marcasCache = {};
 
@@ -266,7 +267,7 @@ function mostrarTodos() {
     wrapper.innerHTML = Object.values(marcasCache).map(m => {
         const precio = m.precio ? '$ ' + Number(m.precio).toLocaleString('es-AR') : '';
         return '<div class="result-row" onclick="seleccionarModulo(' + m.id + ')">' +
-            '<span><strong>' + m.modelo + '</strong></span>' +
+            '<span><strong>' + escHtml(m.modelo) + '</strong></span>' +
             '<span class="precio-badge">' + precio + '</span></div>';
     }).join('');
     wrapper.style.display = 'block';
@@ -289,7 +290,7 @@ function filtrarModelos() {
     wrapper.innerHTML = filtrados.map(m => {
         const precio = m.precio ? '$ ' + Number(m.precio).toLocaleString('es-AR') : '';
         return '<div class="result-row" onclick="seleccionarModulo(' + m.id + ')">' +
-            '<span><strong>' + m.modelo + '</strong></span>' +
+            '<span><strong>' + escHtml(m.modelo) + '</strong></span>' +
             '<span class="precio-badge">' + precio + '</span></div>';
     }).join('');
     wrapper.style.display = 'block';

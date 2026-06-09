@@ -3,7 +3,7 @@
 include 'includes/conexion.php';
 
 $config_imp = [];
-$r_imp = $conn->query("SELECT clave, valor FROM configuracion");
+$r_imp = $conn->query("SELECT clave, valor FROM configuracion WHERE clave IN ('taller_nombre','taller_direccion','taller_telefono','legal_terminos','tipo_impresion','logo_ordenes')");
 if ($r_imp) {
     while ($f_imp = $r_imp->fetch_assoc()) {
         $config_imp[$f_imp['clave']] = $f_imp['valor'];
@@ -40,10 +40,11 @@ $protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : '
 $host_i = $_SERVER['HTTP_HOST'];
 $token_i = $orden['token'] ?? '';
 $tiene_tienda_i = strpos($GLOBALS['taller_modulos'] ?? '', 'tienda') !== false;
+$base_i = !empty($GLOBALS['taller_subdominio']) ? '' : '/modulos';
 if ($tiene_tienda_i) {
-    $tracking_url = "$protocol://$host_i/modulos/tienda/?token=$token_i";
+    $tracking_url = "$protocol://$host_i{$base_i}/tienda/?token=$token_i";
 } else {
-    $tracking_url = "$protocol://$host_i/seguimiento.php?token=$token_i";
+    $tracking_url = "$protocol://$host_i{$base_i}/ordenes/seguimiento.php?token=$token_i";
 }
 
 ?>

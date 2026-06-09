@@ -2,7 +2,7 @@
 include 'includes/verificar_sesion.php';
 include 'includes/estados_helper.php';
 
-$clientesLista = $conn->query("SELECT * FROM clientes ORDER BY nombre ASC");
+$clientesLista = $conn->query("SELECT * FROM clientes ORDER BY nombre ASC LIMIT 200");
 
 $taller_nombre_l = 'FullTaller';
 $tipo_impresion_l = 'separada';
@@ -86,11 +86,29 @@ if (isset($_GET['filtro']) && $filtro == 'cliente' && !empty($_GET['buscar_clien
     $busqueda = $_GET['buscar_cliente'];
 }
 
+// Pagination
+$pagina = max(1, (int)($_GET['pagina'] ?? 1));
+$por_pagina = 50;
+$offset = ($pagina - 1) * $por_pagina;
+
+// Count query
+$sql_count = "SELECT COUNT(*) as total FROM ordenes INNER JOIN clientes ON ordenes.cliente_id = clientes.id";
+if (!empty($where)) {
+    $sql_count .= " WHERE " . implode(" AND ", $where);
+}
+$stmt_count = $conn->prepare($sql_count);
+if (!empty($params)) {
+    $stmt_count->bind_param($types, ...$params);
+}
+$stmt_count->execute();
+$total_ordenes = $stmt_count->get_result()->fetch_assoc()['total'];
+$total_paginas = max(1, ceil($total_ordenes / $por_pagina));
+
 $sql = $sqlBase;
 if (!empty($where)) {
     $sql .= " WHERE " . implode(" AND ", $where);
 }
-$sql .= " ORDER BY ordenes.id DESC";
+$sql .= " ORDER BY ordenes.id DESC LIMIT $por_pagina OFFSET $offset";
 
 $stmt = $conn->prepare($sql);
 if (!empty($params)) {
@@ -999,6 +1017,7 @@ function badgeClass($estado) {
                 <input type="hidden" name="filtro" value="cliente">
                 <input type="hidden" name="buscar_cliente" value="<?php echo htmlspecialchars($busqueda); ?>">
             <?php endif; ?>
+            <input type="hidden" name="pagina" value="1">
         </form>
     </div>
 
@@ -1029,6 +1048,7 @@ function badgeClass($estado) {
         <?php foreach ($estados_seleccionados as $estado): ?>
             <input type="hidden" name="estados[]" value="<?php echo htmlspecialchars($estado); ?>">
         <?php endforeach; ?>
+        <input type="hidden" name="pagina" value="1">
     </form>
 
     <div class="table-scroll-wrapper">
@@ -1122,7 +1142,7 @@ function badgeClass($estado) {
                                 <?php endif; ?>
                                 </ul>
                             </div>
-                            <a class="btn btn-whatsapp btn-sm" href="whatsapp://send?phone=54<?php echo $orden['telefono']; ?>&text=Hola nos comunicamos de <?php echo urlencode($taller_nombre_l); ?> por la orden N° <?php echo $orden['id']; ?>, " title="WhatsApp"><i class="bi bi-whatsapp"></i></a>
+                            <a class="btn btn-whatsapp btn-sm" href="whatsapp://send?phone=54<?php echo $orden['telefono']; ?>&text=<?php echo urlencode('Hola nos comunicamos de ' . $taller_nombre_l . ' por la orden N° ' . $orden['id']); ?>" title="WhatsApp"><i class="bi bi-whatsapp"></i></a>
                             <?php if (!$ya_entregado): ?>
                             <button class="btn btn-primary btn-sm" onclick="event.stopPropagation(); entregarOrden(<?php echo $orden['id']; ?>, this)" title="Marcar como ENTREGADO" style="padding:4px 8px;font-size:12px;border-radius:6px;"><i class="bi bi-phone-flip"></i></button>
                             <?php else: ?>
@@ -1136,6 +1156,26 @@ function badgeClass($estado) {
         </tbody>
     </table>
     </div>
+
+    <!-- Pagination -->
+    <?php if ($total_paginas > 1): ?>
+    <nav class="d-none d-md-flex justify-content-center mt-3">
+        <ul class="pagination pagination-sm">
+            <?php
+            $query_params = $_GET;
+            for ($i = 1; $i <= $total_paginas; $i++):
+                $query_params['pagina'] = $i;
+                $url = '?' . http_build_query($query_params);
+                $active = $i === $pagina ? 'active' : '';
+            ?>
+            <li class="page-item <?php echo $active; ?>">
+                <a class="page-link" href="<?php echo htmlspecialchars($url); ?>"><?php echo $i; ?></a>
+            </li>
+            <?php endfor; ?>
+        </ul>
+    </nav>
+    <div class="d-md-none text-center small text-muted mb-2">Pág. <?php echo $pagina; ?> de <?php echo $total_paginas; ?> (<?php echo $total_ordenes; ?> órdenes)</div>
+    <?php endif; ?>
 
     <!-- MOBILE CARDS -->
     <div class="d-md-none">

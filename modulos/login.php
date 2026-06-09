@@ -31,9 +31,6 @@ $taller_db_user = '';
 $taller_db_pass = '';
 $taller_db_name = '';
 $taller_id = 0;
-$debug_sql_error = null;
-$deb2_row = null;
-
 if (!empty($subdominio)) {
     $_include_path = __DIR__ . '/ordenes/includes/conexion_central.php';
     if (!file_exists($_include_path)) {
@@ -46,9 +43,6 @@ if (!empty($subdominio)) {
     $s = $conn_central->real_escape_string($subdominio);
     $sql_taller = "SELECT id, nombre, db_host, db_user, db_pass, db_name FROM talleres WHERE subdominio = '$s' AND activo = 1 LIMIT 1";
     $r = $conn_central->query($sql_taller);
-    if (!$r) {
-        $debug_sql_error = $conn_central->error;
-    }
     if ($r && $row = $r->fetch_assoc()) {
         $taller_nombre_login = htmlspecialchars($row['nombre']);
         $taller_id = (int)$row['id'];
@@ -56,11 +50,6 @@ if (!empty($subdominio)) {
         $taller_db_user = $row['db_user'];
         $taller_db_pass = $row['db_pass'];
         $taller_db_name = $row['db_name'];
-    }
-    $r2 = $conn_central->query("SELECT id, activo FROM talleres WHERE subdominio = '$s' LIMIT 1");
-    $deb2_row = null;
-    if ($r2) {
-        $deb2_row = $r2->fetch_assoc();
     }
     if (isset($conn_central) && $conn_central instanceof mysqli) {
         $conn_central->close();
@@ -181,24 +170,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <i class="bi bi-exclamation-triangle-fill"></i>
         <?php echo $error; ?>
     </div>
-    <?php if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($subdominio)): ?>
-    <div style="background:#fef9c3;border:1px solid #fde047;border-radius:8px;padding:8px 12px;margin-bottom:16px;font-size:0.8rem;color:#713f12;">
-        <strong>Debug:</strong>
-        subdominio=<code><?php echo htmlspecialchars($subdominio); ?></code>
-        | taller_id=<?php echo $taller_id; ?>
-        | db_user=<code><?php echo htmlspecialchars($taller_db_user ?: '(vacio)'); ?></code>
-        | db_name=<code><?php echo htmlspecialchars($taller_db_name ?: '(vacio)'); ?></code>
-        <?php if (isset($debug_sql_error)): ?>
-        <br><strong>Error SQL:</strong> <?php echo htmlspecialchars($debug_sql_error); ?>
-        <?php endif; ?>
-        <?php if ($deb2_row): ?>
-        <br><strong>Sin filtro activo:</strong> id=<?php echo $deb2_row['id']; ?>
-        | activo=<?php echo htmlspecialchars($deb2_row['activo'] ?? 'NULL'); ?>
-        <?php else: ?>
-        <br><strong>Sin filtro activo:</strong> No encontrado
-        <?php endif; ?>
-    </div>
-    <?php endif; ?>
     <?php endif; ?>
 
     <form method="POST">

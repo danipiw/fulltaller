@@ -37,32 +37,40 @@ $rol = $_SESSION['rol'];
         }
         .topbar .user-info { font-size: 0.9rem; opacity: 0.9; }
         .topbar .user-info strong { opacity: 1; }
-        .container-dash { max-width: 700px; margin: 60px auto; padding: 0 16px; }
-        .dash-title { text-align: center; margin-bottom: 40px; }
-        .dash-title h1 { font-size: 1.8rem; color: var(--jb-navy); font-weight: 700; }
-        .dash-title p { color: #64748b; font-size: 1rem; }
-        .modules-grid { display: grid; gap: 20px; grid-template-columns: 1fr 1fr; }
+        .container-dash { max-width: 100%; margin: 0; padding: 20px 24px; min-height: calc(100vh - 62px); display: flex; flex-direction: column; }
+        .dash-title { text-align: center; margin-bottom: 32px; flex-shrink: 0; }
+        .dash-title h1 { font-size: 1.6rem; color: var(--jb-navy); font-weight: 700; }
+        .dash-title p { color: #64748b; font-size: 0.95rem; }
+        .modules-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 16px; flex: 1; align-content: center; }
         .module-card {
-            background: white; border-radius: 16px; padding: 32px 24px;
+            background: white; border-radius: 16px; padding: 40px 16px;
             text-align: center; cursor: pointer; transition: all 0.2s;
             box-shadow: 0 2px 8px rgba(0,0,0,0.06); border: 2px solid transparent;
-            text-decoration: none; display: block;
+            text-decoration: none; display: flex; flex-direction: column;
+            align-items: center; justify-content: center; min-height: 280px;
+            flex: 1 1 180px; max-width: 240px;
         }
         .module-card:hover {
             transform: translateY(-4px); box-shadow: 0 12px 30px rgba(0,0,0,0.1);
             border-color: var(--jb-azul);
         }
-        .module-card .icon { font-size: 3rem; margin-bottom: 16px; }
-        .module-card .name { font-size: 1.3rem; font-weight: 700; color: var(--jb-navy); }
-        .module-card .desc { font-size: 0.85rem; color: #64748b; margin-top: 4px; }
+        .module-card .icon { font-size: 3.5rem; margin-bottom: 16px; }
+        .module-card .name { font-size: 1.2rem; font-weight: 700; color: var(--jb-navy); }
+        .module-card .desc { font-size: 0.8rem; color: #64748b; margin-top: 6px; }
         .btn-logout {
             background: rgba(255,255,255,0.15); color: white; border: 1px solid rgba(255,255,255,0.3);
             padding: 6px 16px; border-radius: 8px; text-decoration: none; font-size: 0.85rem;
         }
         .btn-logout:hover { background: rgba(255,255,255,0.25); color: white; }
+        @media (max-width: 768px) {
+            .module-card { min-height: 180px; padding: 24px 12px; flex: 1 1 140px; max-width: none; }
+            .module-card .icon { font-size: 2.5rem; }
+            .module-card .name { font-size: 1rem; }
+        }
         @media (max-width: 500px) {
-            .modules-grid { grid-template-columns: 1fr; }
-            .container-dash { margin: 30px auto; }
+            .module-card { min-height: 150px; padding: 20px 10px; flex: 1 1 120px; max-width: none; }
+            .module-card .icon { font-size: 2rem; margin-bottom: 10px; }
+            .container-dash { padding: 16px; }
         }
     </style>
 <script>if('serviceWorker'in navigator){navigator.serviceWorker.register('sw.js').catch(function(){})}</script>
@@ -117,11 +125,18 @@ $rol = $_SESSION['rol'];
         <?php endif; ?>
 
         <?php if (in_array('tienda', $modulos)): ?>
-        <a href="tienda/admin.php" class="module-card" target="_blank">
+        <?php $es_admin_tienda = in_array($rol, ['admin', 'full']); ?>
+        <a href="tienda/<?php echo $es_admin_tienda ? 'admin.php' : 'index.php'; ?>" class="module-card" target="_blank">
             <div class="icon"><i class="bi bi-shop"></i></div>
-            <div class="name">Tienda</div>
-            <div class="desc">Productos y seguimiento para clientes</div>
+            <div class="name">Tienda<?php if (!$es_admin_tienda): ?> <span class="badge bg-info" style="font-size:0.6rem;vertical-align:middle;">Tienda</span><?php endif; ?></div>
+            <div class="desc"><?php echo $es_admin_tienda ? 'Administrar productos y tienda online' : 'Ver tienda y seguimiento de órdenes'; ?></div>
         </a>
+        <?php else: ?>
+        <div class="module-card" style="opacity:0.5;cursor:pointer;" onclick="alert('El módulo Tienda no está activo. Consultá al administrador para habilitarlo.')">
+            <div class="icon"><i class="bi bi-shop"></i></div>
+            <div class="name">Tienda <span class="badge bg-secondary" style="font-size:0.6rem;vertical-align:middle;">Inactivo</span></div>
+            <div class="desc">Tienda online para tus clientes</div>
+        </div>
         <?php endif; ?>
 
         <?php if (!array_intersect(['ordenes', 'pos', 'inventario', 'finanzas', 'tienda'], $modulos)): ?>

@@ -73,7 +73,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['accion'])) {
         }
 
         $pdo->commit();
-        $mensaje = "✅ Guardado correctamente con número #" . $_POST['numero_caja'];
+        $mensaje = "✅ Guardado correctamente con número #" . htmlspecialchars($_POST['numero_caja']);
         $ultimo = $pdo->query("SELECT MAX(numero) FROM cajas")->fetchColumn();
         $proxima_caja = ($ultimo ? $ultimo : 0) + 1;
 
@@ -840,10 +840,10 @@ $marcas = $pdo->query("SELECT * FROM marcas ORDER BY nombre")->fetchAll(PDO::FET
         <h1><i class="bi bi-box-seam"></i> Ingreso de Equipo</h1>
 
         <?php if (!empty($mensaje)): ?>
-            <div class="alert alert-success"><?= $mensaje ?></div>
+            <div class="alert alert-success"><?= htmlspecialchars($mensaje) ?></div>
         <?php endif; ?>
         <?php if (!empty($error)): ?>
-            <div class="alert alert-error"><?= $error ?></div>
+            <div class="alert alert-error"><?= htmlspecialchars($error) ?></div>
         <?php endif; ?>
 
         <form method="POST" id="formIngreso">

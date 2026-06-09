@@ -118,7 +118,7 @@ $db->close();
     <div class="alert alert-success py-2" style="font-size:0.9rem;"><?php echo $mensaje; ?></div>
     <?php endif; ?>
     <?php if ($error): ?>
-    <div class="alert alert-danger py-2" style="font-size:0.9rem;"><?php echo $error; ?></div>
+    <div class="alert alert-danger py-2" style="font-size:0.9rem;"><?php echo htmlspecialchars($error); ?></div>
     <?php endif; ?>
 
     <form method="POST" enctype="multipart/form-data">

@@ -65,7 +65,7 @@ $db->close();
         </p>
 
         <?php if ($error): ?>
-        <div class="alert error"><?php echo $error; ?></div>
+        <div class="alert error"><?php echo htmlspecialchars($error); ?></div>
         <?php endif; ?>
 
         <form method="POST" style="max-width:300px;margin:0 auto;">

@@ -122,7 +122,7 @@ $usuarios = $conn->query("SELECT id, usuario, nombre, rol, activo, created_at FR
         <div>
             <strong style="font-size:1rem;"><?php echo htmlspecialchars($u['nombre']); ?></strong>
             <span class="text-muted" style="font-size:0.85rem;"> (@<?php echo htmlspecialchars($u['usuario']); ?>)</span>
-            <span class="badge-rol badge-<?php echo $u['rol']; ?>"><?php echo ucfirst($u['rol']); ?></span>
+            <span class="badge-rol badge-<?php echo htmlspecialchars($u['rol']); ?>"><?php echo htmlspecialchars(ucfirst($u['rol'])); ?></span>
             <?php if (!$u['activo']): ?>
             <span class="badge bg-secondary">Inactivo</span>
             <?php endif; ?>

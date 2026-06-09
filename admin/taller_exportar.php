@@ -10,7 +10,6 @@ if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
 }
 
 $id = (int)$_GET['id'];
-$exportar_pos = isset($_GET['pos']);
 
 require_once __DIR__ . '/../includes/conexion_central.php';
 
@@ -19,12 +18,12 @@ if (!$taller) {
     die('Taller no encontrado');
 }
 
-$filename = $taller['subdominio'] . ($exportar_pos ? '_pos' : '') . '_' . date('Y-m-d_H-i-s') . '.sql';
+$filename = $taller['subdominio'] . '_' . date('Y-m-d_H-i-s') . '.sql';
 
 header('Content-Type: text/sql; charset=utf-8');
 header('Content-Disposition: attachment; filename="' . $filename . '"');
 
-echo "-- Exportación de: " . $taller['nombre'] . ($exportar_pos ? ' (solo POS)' : '') . "\n";
+echo "-- Exportación de: " . $taller['nombre'] . "\n";
 echo "-- Fecha: " . date('Y-m-d H:i:s') . "\n";
 echo "-- Subdominio: {$taller['subdominio']}\n\n";
 

@@ -246,7 +246,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cerrar'])) {
                 <tr>
                     <td><?php
                         $iconos = ['efectivo' => '💵', 'tarjeta' => '💳', 'transferencia' => '🏦'];
-                        echo ($iconos[$v['metodo_pago']] ?? '') . ' ' . ucfirst($v['metodo_pago']);
+                        echo ($iconos[$v['metodo_pago']] ?? '') . ' ' . htmlspecialchars(ucfirst($v['metodo_pago']));
                     ?></td>
                     <td><?php echo $v['cantidad']; ?></td>
                     <td class="precio">$<?php echo number_format($v['total'], 2); ?></td>
@@ -286,7 +286,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cerrar'])) {
     <?php endif; ?>
 
     <?php if ($error): ?>
-    <div class="alert error"><?php echo $error; ?></div>
+    <div class="alert error"><?php echo htmlspecialchars($error); ?></div>
     <?php endif; ?>
 
     <div class="panel cierre-form">

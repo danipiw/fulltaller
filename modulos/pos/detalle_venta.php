@@ -98,7 +98,7 @@ $metodo_icono = ['efectivo' => '💵', 'tarjeta' => '💳', 'transferencia' => '
             </div>
             <div class="detalle-row">
                 <span class="label">Método de pago:</span>
-                <span class="value"><?php echo ($metodo_icono[$venta['metodo_pago']] ?? '💵') . ' ' . ucfirst($venta['metodo_pago']); ?></span>
+                <span class="value"><?php echo ($metodo_icono[$venta['metodo_pago']] ?? '💵') . ' ' . htmlspecialchars(ucfirst($venta['metodo_pago'])); ?></span>
             </div>
             <div class="detalle-row">
                 <span class="label">Estado:</span>

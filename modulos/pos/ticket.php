@@ -100,7 +100,7 @@ $metodo_icono = ['efectivo' => '💵', 'tarjeta' => '💳', 'transferencia' => '
                     <span>$<?php echo number_format($venta['total'], 2); ?></span>
                 </div>
                 <div style="text-align:right;font-size:11px;color:#64748b;margin-top:4px;">
-                    <?php echo ($metodo_icono[$venta['metodo_pago']] ?? '💵') . ' ' . ucfirst($venta['metodo_pago']); ?>
+                    <?php echo ($metodo_icono[$venta['metodo_pago']] ?? '💵') . ' ' . htmlspecialchars(ucfirst($venta['metodo_pago'])); ?>
                 </div>
             </div>
         </div>

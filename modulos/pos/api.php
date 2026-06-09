@@ -28,9 +28,10 @@ if ($action === 'buscar' && isset($_GET['codigo'])) {
     exit;
 }
 
-if ($action === 'anular' && isset($_GET['id'])) {
+$action_post = $_POST['action'] ?? '';
+if ($action_post === 'anular' && isset($_POST['id'])) {
     $db = getDB();
-    $id = intval($_GET['id']);
+    $id = intval($_POST['id']);
 
     $check = $db->query("SELECT anulada FROM pos_ventas WHERE id = $id");
     $venta = $check ? $check->fetch_assoc() : null;

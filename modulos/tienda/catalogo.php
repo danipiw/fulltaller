@@ -24,37 +24,17 @@ if ($r_s) { while ($f_s = $r_s->fetch_assoc()) $config_s[$f_s['clave']] = $f_s['
 $taller_nombre = htmlspecialchars($config_s['taller_nombre'] ?? 'Taller');
 $taller_telefono = htmlspecialchars($config_s['taller_telefono'] ?? '');
 
-$orden = null;
-$error = '';
-$token = $_GET['token'] ?? '';
-
-if ($token) {
-    $stmt = $conn->prepare("SELECT o.*, c.nombre AS cliente_nombre, c.dni, c.telefono FROM ordenes o INNER JOIN clientes c ON o.cliente_id = c.id WHERE o.token = ?");
-    $stmt->bind_param("s", $token);
-    $stmt->execute();
-    $orden = $stmt->get_result()->fetch_assoc();
-    if (!$orden) $error = 'Token inválido o la orden no fue encontrada.';
-} elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $id_buscar = trim($_POST['id'] ?? '');
-    $dni_buscar = trim($_POST['dni'] ?? '');
-    if ($id_buscar && $dni_buscar) {
-        $stmt = $conn->prepare("SELECT o.*, c.nombre AS cliente_nombre, c.dni, c.telefono FROM ordenes o INNER JOIN clientes c ON o.cliente_id = c.id WHERE o.id = ? AND c.dni = ?");
-        $stmt->bind_param("is", $id_buscar, $dni_buscar);
-        $stmt->execute();
-        $orden = $stmt->get_result()->fetch_assoc();
-        if (!$orden) $error = 'No encontramos una orden con ese N° y DNI.';
-    } else { $error = 'Completá el N° de orden y el DNI.'; }
-}
-
 $activo_filter = $tiene_activo ? 'AND p.activo = 1' : '';
-$productos = $conn->query("SELECT id, codigo, descripcion AS nombre, precio, costo, tienda_descripcion, tienda_imagen FROM pos_productos p WHERE visible_en_tienda = 1 $activo_filter ORDER BY codigo ASC");
+$productos = $conn->query("SELECT p.id, p.codigo, p.descripcion AS nombre, p.precio, p.costo, p.tienda_descripcion, p.tienda_imagen,
+    (SELECT COUNT(*) FROM tienda_fotos WHERE producto_id = p.id) AS fotos_extra
+    FROM pos_productos p WHERE p.visible_en_tienda = 1 $activo_filter ORDER BY p.codigo ASC");
 ?>
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?php echo $taller_nombre; ?> — Seguimiento y Tienda</title>
+    <title><?php echo $taller_nombre; ?> — Tienda</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <style>
@@ -72,23 +52,10 @@ $productos = $conn->query("SELECT id, codigo, descripcion AS nombre, precio, cos
         .card-title { font-weight: 700; font-size: 0.9rem; color: var(--jb-navy); border-bottom: 1px solid #e9ecef; padding-bottom: 8px; margin-bottom: 12px; }
         .producto-card { border: 1px solid #e9ecef; border-radius: 12px; padding: 12px; transition: box-shadow .2s; cursor: pointer; }
         .producto-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-        .producto-img { width: 100%; height: 160px; object-fit: contain; border-radius: 8px; background: #f8f9fa; }
+        .producto-img { width: 100%; height: 180px; object-fit: contain; border-radius: 8px; background: #f8f9fa; }
         .producto-nombre { font-weight: 600; font-size: 0.9rem; color: var(--jb-navy); margin-top: 8px; }
         .producto-precio { font-weight: 700; font-size: 1.1rem; color: #198754; }
         .producto-desc { font-size: 0.8rem; color: #6c757d; }
-        .estado-badge { font-size: 0.85rem; padding: 6px 14px; border-radius: 20px; font-weight: 600; }
-        .info-label { font-size: 0.78rem; color: #6c757d; text-transform: uppercase; letter-spacing: 0.3px; font-weight: 600; }
-        .info-value { font-size: 0.95rem; font-weight: 500; color: var(--jb-navy); }
-        .presupuesto-ok { color: #198754; font-weight: 700; font-size: 1rem; }
-        .timeline { position: relative; padding-left: 28px; }
-        .timeline::before { content: ''; position: absolute; left: 8px; top: 4px; bottom: 4px; width: 2px; background: #dee2e6; }
-        .timeline-item { position: relative; padding-bottom: 12px; }
-        .timeline-item:last-child { padding-bottom: 0; }
-        .timeline-dot { position: absolute; left: -22px; top: 4px; width: 14px; height: 14px; border-radius: 50%; background: var(--jb-navy); border: 2px solid white; }
-        .timeline-item:last-child .timeline-dot { background: #198754; }
-        .timeline-date { font-size: 0.75rem; color: #6c757d; }
-        .timeline-text { font-size: 0.85rem; font-weight: 500; }
-        .search-form { max-width: 480px; margin: 0 auto 20px; }
         .foto-thumb { width: 64px; height: 64px; object-fit: cover; border-radius: 6px; border: 2px solid #dee2e6; cursor: pointer; transition: opacity .15s; }
         .foto-thumb:hover { opacity: 0.8; }
         @media (max-width: 576px) { .nav-jb { padding: 0.3rem 0.75rem; } .nav-jb .nav-brand { font-size: 0.95rem; } .nav-jb .nav-brand img { height: 30px; } }
@@ -98,12 +65,11 @@ $productos = $conn->query("SELECT id, codigo, descripcion AS nombre, precio, cos
 
 <nav class="nav-jb">
     <div class="nav-content">
-        <a href="index.php" class="nav-brand">
+        <a href="catalogo.php" class="nav-brand">
             <img src="../ordenes/logo.png" alt="" onerror="this.style.display='none'">
             <?php echo $taller_nombre; ?>
         </a>
         <div style="display:flex;align-items:center;gap:6px;">
-            <a href="catalogo.php" class="nav-btn"><i class="bi bi-shop"></i> Tienda</a>
             <span class="nav-btn cart-link" onclick="openCart()">
                 <i class="bi bi-cart3"></i> <span id="cart-count-nav">0</span>
             </span>
@@ -113,87 +79,16 @@ $productos = $conn->query("SELECT id, codigo, descripcion AS nombre, precio, cos
 
 <div class="container-fluid py-3 px-3 px-md-4">
 
-    <?php if (!$token && !$orden): ?>
-    <div class="card p-3 mb-4 search-form">
-        <div class="card-title"><i class="bi bi-search me-1"></i>Consultá tu orden</div>
-        <?php if ($error): ?><div class="alert alert-danger py-2"><?php echo htmlspecialchars($error); ?></div><?php endif; ?>
-        <form method="POST">
-            <div class="row g-2">
-                <div class="col-6"><input type="text" name="id" class="form-control" placeholder="N° de orden" required></div>
-                <div class="col-6"><input type="text" name="dni" class="form-control" placeholder="DNI del titular" required></div>
-                <div class="col-12"><button class="btn btn-primary w-100"><i class="bi bi-search me-1"></i>Ver mi orden</button></div>
-            </div>
-        </form>
-    </div>
-    <?php endif; ?>
-
-    <?php if ($orden): ?>
-    <?php
-        $orden_id = $orden['id'];
-        $historial = $conn->prepare("SELECT * FROM estados_log WHERE orden_id = ? ORDER BY fecha DESC");
-        $historial->bind_param("i", $orden_id); $historial->execute();
-        $historial_result = $historial->get_result();
-        $fotos = $conn->prepare("SELECT filename FROM fotos WHERE orden_id = ?");
-        $fotos->bind_param("i", $orden_id); $fotos->execute();
-        $fotos_result = $fotos->get_result();
-        $badge_color = match ($orden['estado']) {
-            'INGRESADO' => 'bg-secondary', 'EN REVISION' => 'bg-info text-dark',
-            'EN ESPERA' => 'bg-warning text-dark', 'APROBADO' => 'bg-primary',
-            'PRESUPUESTO RECHAZADO' => 'bg-danger', 'REPARADO' => 'bg-success',
-            'SIN REPARACION' => 'bg-dark', 'ENTREGADO' => 'bg-success',
-            default => 'bg-secondary'
-        };
-    ?>
-    <div class="card p-3 mb-4" id="orden-info" style="max-width:720px;">
-        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
-            <div>
-                <span class="fw-bold">Orden #<?php echo $orden_id; ?></span>
-                <span class="estado-badge <?php echo $badge_color; ?> ms-2"><?php echo htmlspecialchars($orden['estado']); ?></span>
-            </div>
-            <small class="text-muted"><?php echo date('d/m/Y', strtotime($orden['fecha_ingreso'])); ?></small>
-        </div>
-        <div class="row g-2 mt-2">
-            <div class="col-6 col-md-3"><div class="info-label">Cliente</div><div class="info-value"><?php echo htmlspecialchars($orden['cliente_nombre']); ?></div></div>
-            <div class="col-6 col-md-3"><div class="info-label">Equipo</div><div class="info-value"><?php echo htmlspecialchars($orden['tipo'] . ' ' . $orden['marca'] . ' ' . $orden['modelo']); ?></div></div>
-            <div class="col-6 col-md-3"><div class="info-label">Presupuesto</div><div class="presupuesto-ok"><?php echo $orden['presupuesto'] ? '$' . number_format($orden['presupuesto'], 2) : 'Pendiente'; ?></div></div>
-            <div class="col-6 col-md-3"><div class="info-label">Seña</div><div class="info-value"><?php echo $orden['sena'] > 0 ? '$' . number_format($orden['sena'], 2) : '—'; ?></div></div>
-        </div>
-        <?php if (!empty($orden['falla'])): ?><div class="mt-2"><div class="info-label">Falla reportada</div><div class="info-value"><?php echo nl2br(htmlspecialchars($orden['falla'])); ?></div></div><?php endif; ?>
-        <?php if (!empty($orden['observaciones'])): ?><div class="mt-2"><div class="info-label">Observaciones</div><div class="info-value"><?php echo nl2br(htmlspecialchars($orden['observaciones'])); ?></div></div><?php endif; ?>
-        <?php if ($fotos_result->num_rows > 0): ?>
-        <div class="d-flex gap-2 flex-wrap mt-2">
-            <?php while ($foto = $fotos_result->fetch_assoc()): ?>
-            <a href="../ordenes/uploads/<?php echo htmlspecialchars($foto['filename']); ?>" target="_blank"><img src="../ordenes/uploads/<?php echo htmlspecialchars($foto['filename']); ?>" class="foto-thumb"></a>
-            <?php endwhile; ?>
-        </div>
-        <?php endif; ?>
-        <?php if ($historial_result->num_rows > 0): ?>
-        <div class="timeline mt-2">
-            <?php while ($h = $historial_result->fetch_assoc()): ?>
-            <div class="timeline-item"><div class="timeline-dot"></div><div class="timeline-text"><?php echo htmlspecialchars($h['estado']); ?></div><div class="timeline-date"><?php echo date('d/m/Y H:i', strtotime($h['fecha'])); ?></div></div>
-            <?php endwhile; ?>
-        </div>
-        <?php endif; ?>
-        <div class="mt-2">
-            <a href="catalogo.php" class="btn btn-sm btn-outline-primary"><i class="bi bi-shop"></i> Ver tienda completa</a>
-        </div>
-    </div>
-    <?php endif; ?>
-
     <?php if ($productos && $productos->num_rows > 0): ?>
     <div class="card p-3">
-        <div class="d-flex justify-content-between align-items-center">
-            <div class="card-title mb-0"><i class="bi bi-bag me-1"></i>Productos recomendados</div>
-            <a href="catalogo.php" class="btn btn-sm btn-outline-primary">Ver todos</a>
-        </div>
-        <hr class="mt-2 mb-3">
+        <div class="card-title"><i class="bi bi-bag me-1"></i>Tienda</div>
+        <p class="text-muted" style="font-size:0.85rem;">Agregá productos a tu lista y consultanos por WhatsApp.</p>
         <div class="row g-3">
             <?php while ($p = $productos->fetch_assoc()):
                 $fotos_extra = $conn->query("SELECT filename FROM tienda_fotos WHERE producto_id = " . $p['id'] . " ORDER BY orden ASC LIMIT 1");
                 $foto_extra = $fotos_extra->fetch_assoc();
                 $galeria = [];
                 if ($p['tienda_imagen'] && file_exists("uploads/" . $p['tienda_imagen'])) $galeria[] = 'uploads/' . $p['tienda_imagen'];
-                if ($foto_extra && file_exists("uploads/" . $foto_extra['filename'])) $galeria[] = 'uploads/' . $foto_extra['filename'];
                 $r_fotos_all = $conn->query("SELECT filename FROM tienda_fotos WHERE producto_id = " . $p['id'] . " ORDER BY orden ASC");
                 while ($fa = $r_fotos_all->fetch_assoc()) { if (!in_array('uploads/' . $fa['filename'], $galeria) && file_exists("uploads/" . $fa['filename'])) $galeria[] = 'uploads/' . $fa['filename']; }
                 $img_src = count($galeria) > 0 ? $galeria[0] : '';
@@ -217,9 +112,9 @@ $productos = $conn->query("SELECT id, codigo, descripcion AS nombre, precio, cos
         </div>
     </div>
     <?php else: ?>
-    <div class="card p-3 text-center py-4 text-muted">
-        <i class="bi bi-box-seam" style="font-size:2rem;"></i>
-        <p class="mt-2 mb-0">Próximamente productos disponibles</p>
+    <div class="card p-3 text-center py-5 text-muted">
+        <i class="bi bi-box-seam" style="font-size:3rem;"></i>
+        <p class="mt-3 mb-0">Próximamente productos disponibles</p>
     </div>
     <?php endif; ?>
 
@@ -286,19 +181,13 @@ function checkout() {
     const total = cart.reduce((s, i) => s + i.precio * i.cantidad, 0);
     let msg = 'Hola, quiero comprar:%0A';
     cart.forEach(i => msg += `• ${i.nombre} x${i.cantidad} = $${(i.precio * i.cantidad).toFixed(2)}%0A`);
-    msg += `%0ATotal: $${total.toFixed(2)}%0A`;
-    <?php if ($orden): ?>msg += `%0AOrden #<?php echo $orden_id; ?>`;<?php endif; ?>
+    msg += `%0ATotal: $${total.toFixed(2)}`;
     const wa = prompt('WhatsApp del taller:', '<?php echo htmlspecialchars($taller_telefono, ENT_QUOTES); ?>');
     if (wa) window.open('https://wa.me/' + wa.replace(/[^0-9]/g, '') + '?text=' + encodeURIComponent(msg), '_blank');
 }
 
 let galeriaImgs = [];
-let galeriaId = 0;
-let galeriaNombre = '';
-let galeriaPrecio = 0;
-
 function abrirGaleria(id, nombre, precio) {
-    galeriaId = id; galeriaNombre = nombre; galeriaPrecio = precio;
     document.getElementById('modalGaleriaNombre').textContent = nombre;
     document.getElementById('galeria-precio').textContent = '$' + parseFloat(precio).toFixed(2);
     document.getElementById('galeria-add-cart').onclick = function() { addToCart(id, nombre, precio); bootstrap.Modal.getInstance(document.getElementById('modalGaleria')).hide(); };
@@ -310,33 +199,21 @@ function abrirGaleria(id, nombre, precio) {
         document.getElementById('galeria-descripcion').textContent = data.descripcion || '';
         renderGaleria();
     }).catch(() => renderGaleria());
-
-    // También intentar cargar la imagen principal
-    const thumbsContainer = document.getElementById('galeria-thumbs');
-    thumbsContainer.innerHTML = '<div class="text-muted py-3"><i class="bi bi-arrow-repeat"></i> Cargando...</div>';
+    document.getElementById('galeria-thumbs').innerHTML = '<div class="text-muted py-3"><i class="bi bi-arrow-repeat"></i> Cargando...</div>';
     new bootstrap.Modal(document.getElementById('modalGaleria')).show();
 }
-
 function renderGaleria() {
     const thumbs = document.getElementById('galeria-thumbs');
-    if (galeriaImgs.length === 0) {
-        thumbs.innerHTML = '<div class="text-muted py-2">Sin imágenes disponibles.</div>';
-        document.getElementById('galeria-img').src = '';
-        return;
-    }
-    thumbs.innerHTML = galeriaImgs.map((src, i) =>
-        `<img src="${src}" class="foto-thumb" onclick="mostrarImagen(${i})" style="${i === 0 ? 'border-color:var(--jb-azul);' : ''}">`
-    ).join('');
+    if (galeriaImgs.length === 0) { thumbs.innerHTML = '<div class="text-muted py-2">Sin imágenes.</div>'; document.getElementById('galeria-img').src = ''; return; }
+    thumbs.innerHTML = galeriaImgs.map((src, i) => `<img src="${src}" class="foto-thumb" onclick="mostrarImagen(${i})" style="${i === 0 ? 'border-color:var(--jb-azul);' : ''}">`).join('');
     mostrarImagen(0);
 }
-
 function mostrarImagen(idx) {
     if (idx >= 0 && idx < galeriaImgs.length) {
         document.getElementById('galeria-img').src = galeriaImgs[idx];
         document.querySelectorAll('#galeria-thumbs img').forEach((img, i) => img.style.borderColor = i === idx ? 'var(--jb-azul)' : '#dee2e6');
     }
 }
-
 updateCartUI();
 </script>
 </body>

@@ -66,14 +66,6 @@ $stmt->bind_param("si", $estado, $id);
 
 if ($stmt->execute()) {
     // Registrar en historial de estados
-    $conn->query("CREATE TABLE IF NOT EXISTS estados_log (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        orden_id INT NOT NULL,
-        estado VARCHAR(50) NOT NULL,
-        cambiado_por VARCHAR(20) NOT NULL,
-        fecha DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        INDEX (orden_id)
-    )");
     $usuario_nombre = $_SESSION['nombre'] ?? '';
     $stmt_log = $conn->prepare("INSERT INTO estados_log (orden_id, estado, cambiado_por, cambiado_por_usuario, fecha) VALUES (?, ?, ?, ?, NOW())");
     $stmt_log->bind_param("isss", $id, $estado, $rol_actual, $usuario_nombre);

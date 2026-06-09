@@ -32,10 +32,11 @@ $host_d = $_SERVER['HTTP_HOST'];
 $token_d = $orden['token'] ?? '';
 
 $tiene_tienda_d = strpos($GLOBALS['taller_modulos'] ?? '', 'tienda') !== false;
+$base_d = !empty($GLOBALS['taller_subdominio']) ? '' : '/modulos';
 if ($tiene_tienda_d) {
-    $tracking_url_d = "$protocol_d://$host_d/modulos/tienda/?token=$token_d";
+    $tracking_url_d = "$protocol_d://$host_d{$base_d}/tienda/?token=$token_d";
 } else {
-    $tracking_url_d = "$protocol_d://$host_d/seguimiento.php?token=$token_d";
+    $tracking_url_d = "$protocol_d://$host_d{$base_d}/ordenes/seguimiento.php?token=$token_d";
 }
 $cfg_result_w = $conn->query("SELECT clave, valor FROM configuracion WHERE clave IN ('taller_nombre')");
 $taller_nombre_w = 'FullTaller';
@@ -62,14 +63,6 @@ $icono_autor = $ES_RECEPCION ? 'headset' : 'tools';
 
 // Obtener historial de estados
 $estados_log = [];
-$conn->query("CREATE TABLE IF NOT EXISTS estados_log (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    orden_id INT NOT NULL,
-    estado VARCHAR(50) NOT NULL,
-    cambiado_por VARCHAR(20) NOT NULL,
-    fecha DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    INDEX (orden_id)
-)");
 $stmt_log = $conn->prepare("SELECT * FROM estados_log WHERE orden_id = ? ORDER BY fecha ASC");
 $stmt_log->bind_param("i", $id);
 $stmt_log->execute();

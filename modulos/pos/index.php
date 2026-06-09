@@ -67,14 +67,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cobrar'])) {
     $stmt->close();
 
     $stmt = $db->prepare('INSERT INTO pos_venta_detalle (venta_id, producto_id, descripcion, cantidad, precio_unitario, subtotal) VALUES (?, ?, ?, ?, ?, ?)');
+    $stmt_stock = $db->prepare('UPDATE pos_productos SET stock = stock - ? WHERE id = ?');
     foreach ($items as $item) {
         $desc = $item['descripcion_custom'] ?? null;
         $stmt->bind_param('iisidd', $venta_id, $item['id'], $desc, $item['cantidad'], $item['precio'], $item['subtotal']);
         $stmt->execute();
         if ($item['id'] != $comun_id) {
-            $db->query("UPDATE pos_productos SET stock = stock - {$item['cantidad']} WHERE id = {$item['id']}");
+            $stmt_stock->bind_param('di', $item['cantidad'], $item['id']);
+            $stmt_stock->execute();
         }
     }
+    $stmt_stock->close();
     $stmt->close();
     $db->close();
 
@@ -147,7 +150,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cobrar'])) {
         const waData = {
             items: <?php echo json_encode($items); ?>,
             total: <?php echo $total; ?>,
-            metodo: '<?php echo $metodo_pago; ?>',
+            metodo: <?php echo json_encode($metodo_pago); ?>,
             ventaId: <?php echo $venta_id_success; ?>,
             cajero: '<?php echo htmlspecialchars($_SESSION['nombre']); ?>'
         };

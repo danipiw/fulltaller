@@ -109,9 +109,9 @@ $ultimas_ventas = $r_ultimas_v->fetch_all(MYSQLI_ASSOC);
     <form method="GET" class="filter-bar d-flex align-items-center gap-3 flex-wrap mb-3">
         <span class="fw-semibold" style="font-size:0.9rem;"><i class="bi bi-funnel"></i> Período</span>
         <div class="d-flex align-items-center gap-2">
-            <input type="date" name="desde" class="form-control form-control-sm" value="<?php echo $desde; ?>">
+            <input type="date" name="desde" class="form-control form-control-sm" value="<?php echo htmlspecialchars($desde); ?>">
             <span>—</span>
-            <input type="date" name="hasta" class="form-control form-control-sm" value="<?php echo $hasta; ?>">
+            <input type="date" name="hasta" class="form-control form-control-sm" value="<?php echo htmlspecialchars($hasta); ?>">
         </div>
         <button type="submit" class="btn btn-sm btn-primary"><i class="bi bi-search"></i> Filtrar</button>
         <a href="?" class="btn btn-sm btn-outline-secondary">Hoy</a>
@@ -225,8 +225,8 @@ $ultimas_ventas = $r_ultimas_v->fetch_all(MYSQLI_ASSOC);
                             <td><?php echo $v['id']; ?></td>
                             <td><?php echo date('d/m/Y H:i', strtotime($v['created_at'])); ?></td>
                             <td><?php echo htmlspecialchars($v['cajero'] ?: '-'); ?></td>
-                            <td><?php echo $v['items']; ?></td>
-                            <td><span class="badge bg-<?php echo $v['metodo_pago']==='efectivo'?'success':($v['metodo_pago']==='transferencia'?'info':'warning'); ?>"><?php echo $v['metodo_pago']; ?></span></td>
+                            <td><?php echo htmlspecialchars($v['items']); ?></td>
+                            <td><span class="badge bg-<?php echo $v['metodo_pago']==='efectivo'?'success':($v['metodo_pago']==='transferencia'?'info':'warning'); ?>"><?php echo htmlspecialchars($v['metodo_pago']); ?></span></td>
                             <td class="text-end fw-semibold">$<?php echo number_format($v['total'], 0, ',', '.'); ?></td>
                         </tr>
                         <?php endforeach; ?>

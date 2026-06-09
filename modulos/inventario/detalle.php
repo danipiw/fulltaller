@@ -781,10 +781,10 @@ $componentes = $stmt->fetchAll(PDO::FETCH_ASSOC);
     
     
     <?php if (!empty($mensaje)): ?>
-        <div class="alert alert-success"><?= $mensaje ?></div>
+        <div class="alert alert-success"><?= htmlspecialchars($mensaje) ?></div>
     <?php endif; ?>
     <?php if (!empty($error)): ?>
-        <div class="alert alert-error"><?= $error ?></div>
+        <div class="alert alert-error"><?= htmlspecialchars($error) ?></div>
     <?php endif; ?>
     
     <div class="info-card">

@@ -40,16 +40,14 @@ $stmt->bind_param("isssssdsidss", $cliente_id, $imei, $tipo, $marca, $modelo, $f
 if ($stmt->execute()) {
     $id = $conn->insert_id;
 
-    if (!empty($telefono_nuevo)) {
-        $stmt_check_tel = $conn->prepare("SELECT telefono FROM clientes WHERE id = ?");
-        $stmt_check_tel->bind_param("i", $cliente_id);
-        $stmt_check_tel->execute();
-        $tel_actual = $stmt_check_tel->get_result()->fetch_assoc()['telefono'] ?? '';
-        if ($tel_actual !== $telefono_nuevo) {
-            $stmt_upd_tel = $conn->prepare("UPDATE clientes SET telefono = ? WHERE id = ?");
-            $stmt_upd_tel->bind_param("si", $telefono_nuevo, $cliente_id);
-            $stmt_upd_tel->execute();
-        }
+    $stmt_check_tel = $conn->prepare("SELECT telefono FROM clientes WHERE id = ?");
+    $stmt_check_tel->bind_param("i", $cliente_id);
+    $stmt_check_tel->execute();
+    $tel_actual = $stmt_check_tel->get_result()->fetch_assoc()['telefono'] ?? '';
+    if (!empty($telefono_nuevo) && $tel_actual !== $telefono_nuevo) {
+        $stmt_upd_tel = $conn->prepare("UPDATE clientes SET telefono = ? WHERE id = ?");
+        $stmt_upd_tel->bind_param("si", $telefono_nuevo, $cliente_id);
+        $stmt_upd_tel->execute();
     }
 
     $titulo = 'Nueva orden #' . $id;
@@ -59,21 +57,11 @@ if ($stmt->execute()) {
     $stmt_notif->bind_param("isss", $id, $para_rol, $titulo, $mensaje_notif);
     @$stmt_notif->execute();
 
-    $conn->query("CREATE TABLE IF NOT EXISTS estados_log (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        orden_id INT NOT NULL,
-        estado VARCHAR(50) NOT NULL,
-        cambiado_por VARCHAR(20) NOT NULL,
-        fecha DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        INDEX (orden_id)
-    )");
     $stmt_log = $conn->prepare("INSERT INTO estados_log (orden_id, estado, cambiado_por, fecha) VALUES (?, ?, 'recepcion', NOW())");
     $stmt_log->bind_param("is", $id, $estado);
     @$stmt_log->execute();
 
-    $tel_res = $conn->query("SELECT telefono FROM clientes WHERE id = $cliente_id");
-    $tel_fila = $tel_res ? $tel_res->fetch_assoc() : null;
-    $telefono_cliente = $tel_fila['telefono'] ?? $telefono_nuevo;
+    $telefono_cliente = $telefono_nuevo ?: $tel_actual;
 
     echo json_encode([
         'success' => true,

@@ -4,7 +4,8 @@ $ESTADOS_DEFAULT_TECNICO = ['EN REVISION', 'EN ESPERA', 'APROBADO', 'REPARADO', 
 $ESTADOS_DEFAULT_TODOS = ['INGRESADO', 'EN REVISION', 'EN ESPERA', 'APROBADO', 'PRESUPUESTO RECHAZADO', 'REPARADO', 'SIN REPARACION', 'ENTREGADO'];
 
 function cargarEstadosConfig($conn) {
-    $cfg = [];
+    static $cfg = [];
+    if (!empty($cfg)) return $cfg;
     $r = $conn->query("SELECT clave, valor FROM configuracion WHERE clave IN ('estados_recepcion','estados_tecnico')");
     if ($r) {
         while ($f = $r->fetch_assoc()) {

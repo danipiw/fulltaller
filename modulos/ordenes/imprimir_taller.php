@@ -3,7 +3,7 @@
 include 'includes/conexion.php';
 
 $config_imp_t = [];
-$r_imp_t = $conn->query("SELECT clave, valor FROM configuracion");
+$r_imp_t = $conn->query("SELECT clave, valor FROM configuracion WHERE clave IN ('taller_nombre','taller_direccion','taller_telefono','legal_terminos','tipo_impresion','logo_ordenes')");
 if ($r_imp_t) {
     while ($f_imp_t = $r_imp_t->fetch_assoc()) {
         $config_imp_t[$f_imp_t['clave']] = $f_imp_t['valor'];
@@ -40,10 +40,11 @@ $protocol_t = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' :
 $host_t = $_SERVER['HTTP_HOST'];
 $token_t = $orden['token'] ?? '';
 $tiene_tienda_t = strpos($GLOBALS['taller_modulos'] ?? '', 'tienda') !== false;
+$base_t = !empty($GLOBALS['taller_subdominio']) ? '' : '/modulos';
 if ($tiene_tienda_t) {
-    $tracking_url_t = "$protocol_t://$host_t/modulos/tienda/?token=$token_t";
+    $tracking_url_t = "$protocol_t://$host_t{$base_t}/tienda/?token=$token_t";
 } else {
-    $tracking_url_t = "$protocol_t://$host_t/seguimiento.php?token=$token_t";
+    $tracking_url_t = "$protocol_t://$host_t{$base_t}/ordenes/seguimiento.php?token=$token_t";
 }
 
 ?>
@@ -68,8 +69,8 @@ if ($tiene_tienda_t) {
             color: #1a1a2e;
             background: white;
             width: 210mm;
-            height: 150mm;
-            padding: 4mm 5mm;
+            height: 148mm;
+            padding: 3mm 4mm;
             -webkit-print-color-adjust: exact;
             print-color-adjust: exact;
             overflow: hidden;
@@ -80,8 +81,8 @@ if ($tiene_tienda_t) {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 4px;
-            padding-bottom: 4px;
+            margin-bottom: 3px;
+            padding-bottom: 3px;
             border-bottom: 2.5px solid #1a1a2e;
         }
 
@@ -94,15 +95,14 @@ if ($tiene_tienda_t) {
         .header-left .orden-box {
             border: 2px solid #1a1a2e;
             border-radius: 6px;
-            padding: 4px 14px;
+            padding: 3px 10px;
             text-align: center;
             background: #fafafa;
-            margin-bottom: 6px;
             display: inline-block;
         }
 
         .header-left .orden-box .label {
-            font-size: 9px;
+            font-size: 8px;
             color: #4a4a5a;
             text-transform: uppercase;
             letter-spacing: 1px;
@@ -110,25 +110,13 @@ if ($tiene_tienda_t) {
         }
 
         .header-left .orden-box .numero {
-            font-size: 24px;
+            font-size: 20px;
             font-weight: 800;
             color: #1a1a2e;
             line-height: 1.1;
         }
 
-        .fecha-ingreso {
-            font-size: 10px;
-            color: #4a4a5a;
-        }
-        .fecha-ingreso strong {
-            display: block;
-            font-size: 9px;
-            color: #1a1a2e;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 2px;
-            font-weight: 700;
-        }
+
 
         .header-center {
             text-align: center;
@@ -137,7 +125,7 @@ if ($tiene_tienda_t) {
         }
 
         .header-center h1 {
-            font-size: 22px;
+            font-size: 18px;
             font-weight: 800;
             color: #1a1a2e;
             letter-spacing: 0.5px;
@@ -149,30 +137,34 @@ if ($tiene_tienda_t) {
             min-width: 70px;
         }
 
-        .header-right .qr-code img {
-            width: 60px;
-            height: 60px;
+        .header-right .fecha-ingreso strong {
+            display: block;
+            font-size: 7px;
+            color: #1a1a2e;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            margin-bottom: 1px;
+            font-weight: 700;
         }
 
-        .header-right .qr-label {
-            font-size: 7px;
-            color: #6c757d;
-            margin-top: 2px;
-            line-height: 1;
+        .header-right .fecha-ingreso {
+            font-size: 9px;
+            color: #4a4a5a;
+            line-height: 1.2;
         }
 
         /* ===== GRID PRINCIPAL ===== */
         .main-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 4px;
-            margin-bottom: 3px;
+            gap: 3px;
+            margin-bottom: 2px;
         }
 
         .card {
             border: 1.5px solid #1a1a2e;
             border-radius: 4px;
-            padding: 4px 6px;
+            padding: 3px 5px;
             background: #fafafa;
         }
 
@@ -190,8 +182,8 @@ if ($tiene_tienda_t) {
 
         .data-row {
             display: flex;
-            margin-bottom: 2px;
-            font-size: 11px;
+            margin-bottom: 1px;
+            font-size: 10px;
         }
 
         .data-row .label {
@@ -218,7 +210,7 @@ if ($tiene_tienda_t) {
         .text-card {
             border: 1.5px solid #1a1a2e;
             border-radius: 4px;
-            padding: 4px 6px;
+            padding: 3px 5px;
             background: #fafafa;
         }
 
@@ -235,16 +227,16 @@ if ($tiene_tienda_t) {
         }
 
         .text-content {
-            font-size: 11px;
-            line-height: 1.3;
+            font-size: 10px;
+            line-height: 1.2;
             color: #2a2a3e;
-            min-height: 28px;
+            min-height: 22px;
             font-weight: 500;
         }
 
         /* ===== CHECKLIST ===== */
         .checklist-section {
-            margin-bottom: 3px;
+            margin-bottom: 2px;
         }
 
         .checklist-title {
@@ -262,7 +254,7 @@ if ($tiene_tienda_t) {
         .checklist-grid {
             display: grid;
             grid-template-columns: 1fr 1fr 1fr;
-            gap: 3px;
+            gap: 2px;
         }
 
         .check-item {
@@ -271,14 +263,14 @@ if ($tiene_tienda_t) {
             align-items: center;
             border: 1.5px solid #1a1a2e;
             border-radius: 3px;
-            padding: 2px 5px;
+            padding: 1px 4px;
             background: #fafafa;
         }
 
         .check-item span {
             color: #1a1a2e;
             font-weight: 600;
-            font-size: 10px;
+            font-size: 9px;
         }
 
         .checks {
@@ -287,14 +279,14 @@ if ($tiene_tienda_t) {
         }
 
         .check-box {
-            width: 16px;
-            height: 12px;
+            width: 14px;
+            height: 10px;
             border: 1.5px solid #1a1a2e;
             border-radius: 2px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 8px;
+            font-size: 7px;
             font-weight: 700;
             color: #1a1a2e;
             background: #fff;
@@ -302,7 +294,7 @@ if ($tiene_tienda_t) {
 
         /* ===== FIRMAS ===== */
         .firmas-section {
-            margin-bottom: 3px;
+            margin-bottom: 2px;
         }
 
         .firmas-row {
@@ -314,7 +306,7 @@ if ($tiene_tienda_t) {
         .firma-box {
             border: 1.5px solid #1a1a2e;
             border-radius: 4px;
-            padding: 3px 6px;
+            padding: 2px 5px;
             background: #fafafa;
             text-align: center;
         }
@@ -330,8 +322,8 @@ if ($tiene_tienda_t) {
 
         .firma-linea {
             border-bottom: 1.5px solid #1a1a2e;
-            min-height: 22px;
-            margin: 2px 0;
+            min-height: 16px;
+            margin: 1px 0;
         }
 
         .firma-label {
@@ -346,16 +338,16 @@ if ($tiene_tienda_t) {
         .bottom-row {
             display: grid;
             grid-template-columns: 7.5fr 1.5fr;
-            gap: 4px;
+            gap: 3px;
             align-items: stretch;
-            height: 48mm;
+            height: 42mm;
         }
 
         /* --- TALONARIO --- */
         .talonario-section {
             border: 2px dashed #1a1a2e;
             border-radius: 4px;
-            padding: 5px 8px;
+            padding: 3px 6px;
             background: #fafafa;
             display: flex;
             flex-direction: column;
@@ -366,13 +358,13 @@ if ($tiene_tienda_t) {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 3px;
-            padding-bottom: 3px;
+            margin-bottom: 2px;
+            padding-bottom: 2px;
             border-bottom: 2px dashed #1a1a2e;
         }
 
         .talonario-header h3 {
-            font-size: 11px;
+            font-size: 10px;
             font-weight: 700;
             color: #1a1a2e;
             text-transform: uppercase;
@@ -448,7 +440,7 @@ if ($tiene_tienda_t) {
         .etiqueta-section {
             border: 2px solid #1a1a2e;
             border-radius: 4px;
-            padding: 3px;
+            padding: 2px;
             background: #fafafa;
             display: flex;
             flex-direction: column;
@@ -596,11 +588,6 @@ if ($tiene_tienda_t) {
             <div class="label">Orden</div>
             <div class="numero"><?php echo htmlspecialchars($orden['id']); ?></div>
         </div>
-        <div class="fecha-ingreso">
-            <strong>Fecha y hora de Ingreso</strong>
-            <?php echo date('j/n/Y', strtotime($orden['fecha_ingreso'])); ?><br>
-            <?php echo date('H:i:s', strtotime($orden['fecha_ingreso'])); ?>
-        </div>
     </div>
 
     <div class="header-center">
@@ -608,12 +595,11 @@ if ($tiene_tienda_t) {
     </div>
 
     <div class="header-right">
-        <?php if (!empty($orden['token'])): ?>
-        <div class="qr-code">
-            <img src="https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=<?php echo urlencode($tracking_url_t); ?>" alt="QR">
-            <div class="qr-label">Escanéa para seguimiento</div>
+        <div class="fecha-ingreso">
+            <strong>Fecha y hora de Ingreso</strong>
+            <?php echo date('j/n/Y', strtotime($orden['fecha_ingreso'])); ?><br>
+            <?php echo date('H:i:s', strtotime($orden['fecha_ingreso'])); ?>
         </div>
-        <?php endif; ?>
     </div>
 </div>
 
@@ -802,3 +788,4 @@ if ($tiene_tienda_t) {
 <?php endif; ?>
 </body>
 </html>
+

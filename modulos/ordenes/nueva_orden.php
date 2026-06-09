@@ -4,15 +4,16 @@ include 'includes/verificar_sesion.php';
 
 $protocol_n = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http';
 $host_n = $_SERVER['HTTP_HOST'];
-$tiene_tienda_n = isset($_SESSION['user_modulos']) && strpos($_SESSION['user_modulos'], 'tienda') !== false;
+$tiene_tienda_n = strpos($GLOBALS['taller_modulos'] ?? '', 'tienda') !== false;
+$base_n = !empty($GLOBALS['taller_subdominio']) ? '' : '/modulos';
 if ($tiene_tienda_n) {
-    $tracking_base_n = "$protocol_n://$host_n/modulos/tienda/?token=";
+    $tracking_base_n = "$protocol_n://$host_n{$base_n}/tienda/?token=";
 } else {
-    $tracking_base_n = "$protocol_n://$host_n/seguimiento.php?token=";
+    $tracking_base_n = "$protocol_n://$host_n{$base_n}/ordenes/seguimiento.php?token=";
 }
 
 $clientes = $conn->query(
-    "SELECT * FROM clientes ORDER BY nombre ASC"
+    "SELECT * FROM clientes ORDER BY nombre ASC LIMIT 200"
 );
 
 $marcas = $conn->query(
@@ -626,8 +627,8 @@ if ($cfg_ord && $cfg_ord->num_rows > 0) {
                             <select name="cliente_id" id="cliente_select" class="form-select" onchange="cargarCliente()" required>
                                 <option value="">Seleccionar</option>
                                 <?php while($cliente = $clientes->fetch_assoc()) { ?>
-                                    <option value="<?php echo $cliente['id']; ?>" data-dni="<?php echo $cliente['dni']; ?>" data-telefono="<?php echo $cliente['telefono']; ?>">
-                                        <?php echo strtoupper($cliente['nombre']); ?>
+                                    <option value="<?php echo $cliente['id']; ?>" data-dni="<?php echo htmlspecialchars($cliente['dni']); ?>" data-telefono="<?php echo htmlspecialchars($cliente['telefono']); ?>">
+                                        <?php echo htmlspecialchars(strtoupper($cliente['nombre'])); ?>
                                     </option>
                                 <?php } ?>
                             </select>
@@ -664,7 +665,7 @@ if ($cfg_ord && $cfg_ord->num_rows > 0) {
                                 <select id="selectTipo" name="tipo" class="form-select" required>
                                     <option value="">Seleccionar</option>
                                     <?php while($tipo = $tipos->fetch_assoc()) { ?>
-                                        <option value="<?php echo strtoupper($tipo['nombre']); ?>"><?php echo strtoupper($tipo['nombre']); ?></option>
+                                        <option value="<?php echo htmlspecialchars(strtoupper($tipo['nombre'])); ?>"><?php echo htmlspecialchars(strtoupper($tipo['nombre'])); ?></option>
                                     <?php } ?>
                                 </select>
                                 <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#modalTipo">+</button>
@@ -676,7 +677,7 @@ if ($cfg_ord && $cfg_ord->num_rows > 0) {
                                 <select id="selectMarca" name="marca" class="form-select" required>
                                     <option value="">Seleccionar</option>
                                     <?php while($marca = $marcas->fetch_assoc()) { ?>
-                                        <option value="<?php echo strtoupper($marca['nombre']); ?>"><?php echo strtoupper($marca['nombre']); ?></option>
+                                        <option value="<?php echo htmlspecialchars(strtoupper($marca['nombre'])); ?>"><?php echo htmlspecialchars(strtoupper($marca['nombre'])); ?></option>
                                     <?php } ?>
                                 </select>
                                 <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#modalMarca">+</button>
