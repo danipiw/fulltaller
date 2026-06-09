@@ -273,6 +273,51 @@ if ($tiene_tienda_i) {
             font-weight: 500;
         }
 
+        /* ===== PRESUPUESTO Y SEÑA ===== */
+        .pago-section {
+            margin-bottom: 6px;
+        }
+
+        .pago-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 6px;
+        }
+
+        .pago-box {
+            border: 1.5px solid #1a1a2e;
+            border-radius: 4px;
+            padding: 5px 8px;
+            background: #fafafa;
+            text-align: center;
+        }
+
+        .pago-box.pago-restante {
+            background: #e8f4f8;
+            border-color: #0077b6;
+        }
+
+        .pago-label {
+            display: block;
+            font-size: 8px;
+            font-weight: 700;
+            color: #1a1a2e;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 2px;
+        }
+
+        .pago-value {
+            display: block;
+            font-size: 16px;
+            font-weight: 800;
+            color: #1a1a2e;
+        }
+
+        .pago-restante .pago-value {
+            color: #0077b6;
+        }
+
         /* ===== TÉRMINOS Y CONDICIONES ===== */
         .terminos-section {
             border: 1.5px solid #1a1a2e;
@@ -418,6 +463,24 @@ if ($tiene_tienda_i) {
     <div class="obs-box">
         <div class="title">Observaciones</div>
         <div class="content"><?php echo !empty($orden['observaciones']) ? nl2br(htmlspecialchars($orden['observaciones'])) : ''; ?></div>
+    </div>
+</div>
+
+<!-- ===== PRESUPUESTO Y SEÑA ===== -->
+<div class="pago-section">
+    <div class="pago-row">
+        <div class="pago-box">
+            <span class="pago-label">Presupuesto</span>
+            <span class="pago-value">$<?php echo number_format((float)($orden['presupuesto'] ?? 0), 2); ?></span>
+        </div>
+        <div class="pago-box">
+            <span class="pago-label">Seña</span>
+            <span class="pago-value">$<?php echo number_format((float)($orden['sena'] ?? 0), 2); ?></span>
+        </div>
+        <div class="pago-box pago-restante">
+            <span class="pago-label">Saldo Restante</span>
+            <span class="pago-value">$<?php echo number_format((float)(($orden['presupuesto'] ?? 0) - ($orden['sena'] ?? 0)), 2); ?></span>
+        </div>
     </div>
 </div>
 
