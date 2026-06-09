@@ -342,7 +342,7 @@ if ($tiene_tienda_i) {
         }
         .hoja-taller .firma-linea {
             border-bottom: 1.5px solid #1a1a2e;
-            min-height: 22px;
+            min-height: 40px;
             margin: 2px 0;
         }
         .hoja-taller .firma-label {
@@ -775,10 +775,6 @@ if ($tiene_tienda_i) {
             }
         }
 
-        @page {
-            size: A4;
-            margin: 0;
-        }
     </style>
 </head>
 <body>

@@ -322,7 +322,7 @@ if ($tiene_tienda_t) {
 
         .firma-linea {
             border-bottom: 1.5px solid #1a1a2e;
-            min-height: 16px;
+            min-height: 40px;
             margin: 1px 0;
         }
 
@@ -563,11 +563,6 @@ if ($tiene_tienda_t) {
 
         .print-btn:hover {
             background: #33334a;
-        }
-
-        @page {
-            margin: 0;
-            size: 210mm 148mm;
         }
 
         @media print {
