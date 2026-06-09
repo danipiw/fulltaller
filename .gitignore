@@ -34,6 +34,5 @@ modulos/ordenes/refs/
 # Sensitive / local files
 modulos/pos/.ssh/
 modulos/pos/public_html/
-modulos/pos/.imunify_*
-modulos/pos/*.id
-*.id
+modulos/pos/.imunify*
+modulos/pos/.myimunify_id
