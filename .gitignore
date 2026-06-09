@@ -30,3 +30,10 @@ modulos/ordenes/hooks/
 modulos/ordenes/info/
 modulos/ordenes/objects/
 modulos/ordenes/refs/
+
+# Sensitive / local files
+modulos/pos/.ssh/
+modulos/pos/public_html/
+modulos/pos/.imunify_*
+modulos/pos/*.id
+*.id

@@ -565,6 +565,11 @@ if ($tiene_tienda_t) {
             background: #33334a;
         }
 
+        @page {
+            margin: 0;
+            size: 210mm 148mm;
+        }
+
         @media print {
             .no-print {
                 display: none !important;
