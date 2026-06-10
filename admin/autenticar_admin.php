@@ -18,6 +18,9 @@ $admin = $result->fetch_assoc();
 $stmt->close();
 
 if ($admin && password_verify($password, $admin['password'])) {
+    session_destroy();
+    session_start();
+    session_regenerate_id(true);
     $_SESSION['admin_id'] = $admin['id'];
     $_SESSION['admin_usuario'] = $admin['usuario'];
     $_SESSION['admin_nombre'] = $admin['nombre'];

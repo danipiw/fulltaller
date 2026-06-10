@@ -16,6 +16,9 @@ $resultado = $conn->query("SELECT id, usuario, password, nombre, rol, modulos FR
 
 if ($resultado && $usuario = $resultado->fetch_assoc()) {
     if (password_verify($password_ingresado, $usuario['password'])) {
+        session_destroy();
+        session_start();
+        session_regenerate_id(true);
         $_SESSION['usuario_id'] = $usuario['id'];
         $_SESSION['rol'] = $usuario['rol'];
         $_SESSION['nombre'] = $usuario['nombre'];

@@ -74,6 +74,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $r = $conn->query("SELECT id, usuario, password, nombre, rol, modulos FROM usuarios WHERE usuario = '$u' AND activo = 1 LIMIT 1");
             if ($user = $r->fetch_assoc()) {
                 if (password_verify($password, $user['password'])) {
+                    session_destroy();
+                    session_start();
+                    session_regenerate_id(true);
                     $_SESSION['usuario_id'] = $user['id'];
                     $_SESSION['rol'] = $user['rol'];
                     $_SESSION['nombre'] = $user['nombre'];
