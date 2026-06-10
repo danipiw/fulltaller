@@ -947,6 +947,10 @@ while ($f = $result_fotos->fetch_assoc()) {
 </div>
 
 <script>
+function escHtml(str) {
+    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
 function enviarNota(ordenId) {
     const mensaje = document.getElementById('mensajeNota').value.trim();
     const btn = document.querySelector('.btn-enviar-nota');
@@ -968,12 +972,12 @@ function enviarNota(ordenId) {
             const icon = data.autor == 'tecnico' ? 'tools' : 'headset';
             const label = data.autor_nombre || (data.autor == 'tecnico' ? 'Técnico' : 'Recepción');
             chatBox.insertAdjacentHTML('beforeend', `
-                <div class="nota ${cls}">
+                <div class="nota ${escHtml(cls)}">
                     <div class="nota-header">
-                        <i class="bi bi-${icon}"></i> ${label}
-                        <span class="nota-fecha">${data.fecha}</span>
+                        <i class="bi bi-${escHtml(icon)}"></i> ${escHtml(label)}
+                        <span class="nota-fecha">${escHtml(data.fecha)}</span>
                     </div>
-                    <div class="nota-texto">${mensaje.replace(/\\n/g, '<br>')}</div>
+                    <div class="nota-texto">${escHtml(mensaje).replace(/\\n/g, '<br>')}</div>
                 </div>
             `);
             chatBox.scrollTop = chatBox.scrollHeight;
