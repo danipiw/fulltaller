@@ -42,6 +42,21 @@ if (!empty($_SESSION['login_host']) && $_SESSION['login_host'] !== ($_SERVER['HT
     exit;
 }
 
+// Verificar sesión única por usuario (token en BD)
+if (!empty($_SESSION['usuario_id'])) {
+    $stmt_tk = $conn->prepare("SELECT ultimo_session_token FROM usuarios WHERE id = ?");
+    $stmt_tk->bind_param("i", $_SESSION['usuario_id']);
+    $stmt_tk->execute();
+    $r_tk = $stmt_tk->get_result();
+    $row_tk = $r_tk->fetch_assoc();
+    $stmt_tk->close();
+    if (!$row_tk || $row_tk['ultimo_session_token'] !== ($_SESSION['session_token'] ?? '')) {
+        session_destroy();
+        header('Location: ../../login.php?error=sesion');
+        exit;
+    }
+}
+
 // Generar token si no existe (sesiones existentes post-migración)
 if (!isset($_SESSION['api_token'])) {
     $_SESSION['api_token'] = bin2hex(random_bytes(16));

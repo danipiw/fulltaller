@@ -2,13 +2,29 @@
 session_start();
 
 if (isset($_SESSION['admin_id'])) {
-    header('Location: talleres.php');
-    exit;
+    require_once __DIR__ . '/includes/conexion_central.php';
+    $stmt_tk = $conn_central->prepare("SELECT ultimo_session_token FROM admin_usuarios WHERE id = ?");
+    $stmt_tk->bind_param("i", $_SESSION['admin_id']);
+    $stmt_tk->execute();
+    $r_tk = $stmt_tk->get_result();
+    $row_tk = $r_tk->fetch_assoc();
+    $stmt_tk->close();
+    $conn_central->close();
+    if ($row_tk && $row_tk['ultimo_session_token'] === ($_SESSION['admin_session_token'] ?? '')) {
+        header('Location: talleres.php');
+        exit;
+    }
+    session_destroy();
+    session_start();
 }
 
 $error = '';
 if (isset($_GET['error'])) {
-    $error = 'Credenciales incorrectas';
+    if ($_GET['error'] === 'sesion') {
+        $error = 'Su sesión expiró o fue abierta en otro dispositivo';
+    } else {
+        $error = 'Credenciales incorrectas';
+    }
 }
 ?>
 <!DOCTYPE html>

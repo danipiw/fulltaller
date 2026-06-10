@@ -6,6 +6,34 @@ if (!empty($_SESSION['login_host']) && $_SESSION['login_host'] !== ($_SERVER['HT
     exit;
 }
 
+// Verificar sesión única por usuario (token en BD)
+if (!empty($_SESSION['usuario_id'])) {
+    $tk_host = $_SESSION['taller_db_host'] ?? 'localhost';
+    $tk_user = $_SESSION['taller_db_user'] ?? '';
+    $tk_pass = $_SESSION['taller_db_pass'] ?? '';
+    $tk_name = $_SESSION['taller_db_name'] ?? '';
+    if (!empty($tk_user) && !empty($tk_name)) {
+        $tk_conn = @new mysqli($tk_host, $tk_user, $tk_pass, $tk_name);
+        if (!$tk_conn->connect_error) {
+            $stmt_tk = $tk_conn->prepare("SELECT ultimo_session_token FROM usuarios WHERE id = ?");
+            if ($stmt_tk) {
+                $stmt_tk->bind_param("i", $_SESSION['usuario_id']);
+                $stmt_tk->execute();
+                $r_tk = $stmt_tk->get_result();
+                $row_tk = $r_tk->fetch_assoc();
+                $stmt_tk->close();
+                if (!$row_tk || $row_tk['ultimo_session_token'] !== ($_SESSION['session_token'] ?? '')) {
+                    $tk_conn->close();
+                    session_destroy();
+                    header('Location: login.php?error=sesion');
+                    exit;
+                }
+            }
+            $tk_conn->close();
+        }
+    }
+}
+
 if (!isset($_SESSION['api_token'])) {
     $_SESSION['api_token'] = bin2hex(random_bytes(16));
 }
