@@ -42,20 +42,23 @@ function obtenerTodosEstados($conn) {
     return array_values(array_unique(array_merge($recepcion, $tecnico, ['ENTREGADO'])));
 }
 
-function badgeClassEstados($estado) {
+function getEstadoColor($estado) {
     $mapa = [
-        'INGRESADO' => 'bg-secondary',
-        'EN REVISION' => 'bg-info',
-        'EN ESPERA' => 'bg-warning text-dark',
-        'APROBADO' => 'bg-success',
-        'PRESUPUESTO RECHAZADO' => 'bg-danger',
-        'REPARADO' => 'bg-success',
-        'SIN REPARACION' => 'bg-dark',
-        'ENTREGADO' => 'bg-primary',
-        'CHEQUEO FINAL' => 'bg-info',
+        'INGRESADO' => ['bg' => '#6c757d', 'fg' => '#ffffff'],
+        'EN REVISION' => ['bg' => '#0dcaf0', 'fg' => '#055160'],
+        'EN ESPERA' => ['bg' => '#ffc107', 'fg' => '#664d03'],
+        'APROBADO' => ['bg' => '#20c997', 'fg' => '#ffffff'],
+        'PRESUPUESTO RECHAZADO' => ['bg' => '#dc3545', 'fg' => '#ffffff'],
+        'REPARADO' => ['bg' => '#198754', 'fg' => '#ffffff'],
+        'SIN REPARACION' => ['bg' => '#212529', 'fg' => '#ffffff'],
+        'ENTREGADO' => ['bg' => '#0d6efd', 'fg' => '#ffffff'],
     ];
     if (isset($mapa[$estado])) return $mapa[$estado];
-    $colores = ['bg-secondary','bg-info','bg-warning text-dark','bg-success','bg-danger','bg-dark','bg-primary'];
-    $idx = abs(crc32($estado)) % count($colores);
-    return $colores[$idx];
+    $palette = [['bg'=>'#6c757d','fg'=>'#ffffff'],['bg'=>'#0dcaf0','fg'=>'#055160'],['bg'=>'#ffc107','fg'=>'#664d03'],['bg'=>'#20c997','fg'=>'#ffffff'],['bg'=>'#dc3545','fg'=>'#ffffff'],['bg'=>'#212529','fg'=>'#ffffff'],['bg'=>'#0d6efd','fg'=>'#ffffff']];
+    $idx = abs(crc32($estado)) % count($palette);
+    return $palette[$idx];
+}
+
+function badgeClassEstados($estado) {
+    return 'est-badge-' . str_replace(' ', '-', $estado);
 }

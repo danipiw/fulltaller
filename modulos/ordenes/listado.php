@@ -378,29 +378,16 @@ function badgeClass($estado) {
 
         /* Colores por estado (dinámico) */
         <?php
-        $estado_hex = [
-            'INGRESADO' => ['bg'=>'#6c757d', 'fg'=>'#6c757d'],
-            'EN REVISION' => ['bg'=>'#0dcaf0', 'fg'=>'#055160'],
-            'EN ESPERA' => ['bg'=>'#ffc107', 'fg'=>'#664d03'],
-            'APROBADO' => ['bg'=>'#20c997', 'fg'=>'#0a3622'],
-            'PRESUPUESTO RECHAZADO' => ['bg'=>'#dc3545', 'fg'=>'#842029'],
-            'REPARADO' => ['bg'=>'#198754', 'fg'=>'#0f5132'],
-            'SIN REPARACION' => ['bg'=>'#212529', 'fg'=>'#212529'],
-            'ENTREGADO' => ['bg'=>'#0d6efd', 'fg'=>'#084298'],
-        ];
-        $palette = ['#6c757d','#0dcaf0','#ffc107','#20c997','#dc3545','#212529','#0d6efd','#e83e8c','#fd7e14','#6f42c1','#17a2b8','#28a745'];
         foreach ($todos_estados as $est):
+            $color = getEstadoColor($est);
             $cls = 'est-' . str_replace(' ', '-', $est);
-            if (isset($estado_hex[$est])) {
-                $hex = $estado_hex[$est]['bg'];
-                $fg = $estado_hex[$est]['fg'];
-            } else {
-                $idx = abs(crc32($est)) % count($palette);
-                $hex = $palette[$idx];
-                $fg = '#1e293b';
-            }
+            $hex = $color['bg'];
+            $fg = $color['fg'];
             echo ".$cls label { background-color: {$hex}20; color: $fg; border-color: {$hex}40; }\n";
             echo ".$cls input:checked + label { background-color: $hex; color: white; }\n";
+            // Badge class
+            $bcls = 'est-badge-' . str_replace(' ', '-', $est);
+            echo ".$bcls { background-color: $hex; color: $fg; padding: 5px 10px; border-radius: 6px; font-size: 0.78rem; font-weight: 600; display: inline-block; }\n";
         endforeach;
         ?>
 
@@ -425,11 +412,12 @@ function badgeClass($estado) {
         .btn-estado-tecnico:active { transform: scale(0.95); }
         .btn-estado-tecnico.inactivo { opacity: 0.35; filter: grayscale(0.6); }
         .btn-estado-tecnico.inactivo:hover { opacity: 0.6; filter: grayscale(0.3); }
-        .btn-estado-revisado { background: linear-gradient(135deg, #0dcaf0, #0891b2); color: white; }
-        .btn-estado-esperando { background: linear-gradient(135deg, #f59e0b, #d97706); color: white; }
-        .btn-estado-aprobado { background: linear-gradient(135deg, #0ea5e9, #0284c7); color: white; }
-        .btn-estado-reparado { background: linear-gradient(135deg, #198754, #166534); color: white; }
-        .btn-estado-sinreparacion { background: linear-gradient(135deg, #495057, #212529); color: white; }
+        /* Botones de estado (dinámico) */
+        <?php foreach ($todos_estados as $est):
+            $bcl = 'btn-est-' . str_replace(' ', '-', $est);
+            $bc = getEstadoColor($est);
+            echo ".$bcl { background: {$bc['bg']}; color: {$bc['fg']}; }\n";
+        endforeach; ?>
 
         /* Dropdown estado recepción */
         .estado-dropdown { position: relative; }
@@ -737,11 +725,12 @@ function badgeClass($estado) {
         body.dark-mode .btn-dark { background: linear-gradient(135deg, #4b5563, #1f2937) !important; color: white !important; border: none; }
         body.dark-mode .btn-primary { background: linear-gradient(135deg, #2563eb, #1d4ed8) !important; color: white !important; border: none; }
         body.dark-mode .btn-info { background: linear-gradient(135deg, #0891b2, #0e7490) !important; color: white !important; border: none; }
-        body.dark-mode .btn-estado-revisado { background: linear-gradient(135deg, #0891b2, #0e7490) !important; }
-        body.dark-mode .btn-estado-esperando { background: linear-gradient(135deg, #d97706, #b45309) !important; }
-        body.dark-mode .btn-estado-aprobado { background: linear-gradient(135deg, #0284c7, #0369a1) !important; }
-        body.dark-mode .btn-estado-reparado { background: linear-gradient(135deg, #16a34a, #15803d) !important; }
-        body.dark-mode .btn-estado-sinreparacion { background: linear-gradient(135deg, #4b5563, #374151) !important; }
+        /* Dark mode botones de estado (dinámico) */
+        <?php foreach ($todos_estados as $est):
+            $bcl = 'btn-est-' . str_replace(' ', '-', $est);
+            $bc = getEstadoColor($est);
+            echo "body.dark-mode .$bcl { background: {$bc['bg']} !important; color: {$bc['fg']} !important; }\n";
+        endforeach; ?>
         /* Dark mode estados (dinámico) */
         <?php
         $dm_dark = ['#374151','#0e4a5a','#5a4a0e','#0e4a2e','#5a1a1a','#1f2937','#0e2a5a','#3b1a5a','#5a3a0e','#3a1a5a','#0e3a5a','#0a4a3a'];
@@ -1092,11 +1081,11 @@ function badgeClass($estado) {
                             <span class="badge bg-primary">ENTREGADO</span>
                         <?php else: ?>
                             <div class="estado-botones">
-                                <button class="btn-estado-tecnico btn-estado-revisado <?php echo ($estado_actual != 'EN REVISION') ? 'inactivo' : ''; ?>" onclick="cambiarEstado(<?php echo $orden['id']; ?>, 'EN REVISION')" title="En Revisión"><i class="bi bi-eye"></i> En Revisión</button>
-                                <button class="btn-estado-tecnico btn-estado-esperando <?php echo ($estado_actual != 'EN ESPERA') ? 'inactivo' : ''; ?>" onclick="cambiarEstado(<?php echo $orden['id']; ?>, 'EN ESPERA')" title="En Espera"><i class="bi bi-hourglass-split"></i> En Espera</button>
-                                <button class="btn-estado-tecnico btn-estado-aprobado <?php echo ($estado_actual != 'APROBADO') ? 'inactivo' : ''; ?>" onclick="cambiarEstado(<?php echo $orden['id']; ?>, 'APROBADO')" title="Aprobado"><i class="bi bi-check2-circle"></i> Aprobado</button>
-                                <button class="btn-estado-tecnico btn-estado-reparado <?php echo ($estado_actual != 'REPARADO') ? 'inactivo' : ''; ?>" onclick="cambiarEstado(<?php echo $orden['id']; ?>, 'REPARADO')" title="Reparado"><i class="bi bi-check-circle"></i> Reparado</button>
-                                <button class="btn-estado-tecnico btn-estado-sinreparacion <?php echo ($estado_actual != 'SIN REPARACION') ? 'inactivo' : ''; ?>" onclick="cambiarEstado(<?php echo $orden['id']; ?>, 'SIN REPARACION')" title="Sin Reparación"><i class="bi bi-x-circle"></i> Sin Reparación</button>
+                                <button class="btn-estado-tecnico btn-est-EN-REVISION <?php echo ($estado_actual != 'EN REVISION') ? 'inactivo' : ''; ?>" onclick="cambiarEstado(<?php echo $orden['id']; ?>, 'EN REVISION')" title="En Revisión"><i class="bi bi-eye"></i> En Revisión</button>
+                                <button class="btn-estado-tecnico btn-est-EN-ESPERA <?php echo ($estado_actual != 'EN ESPERA') ? 'inactivo' : ''; ?>" onclick="cambiarEstado(<?php echo $orden['id']; ?>, 'EN ESPERA')" title="En Espera"><i class="bi bi-hourglass-split"></i> En Espera</button>
+                                <button class="btn-estado-tecnico btn-est-APROBADO <?php echo ($estado_actual != 'APROBADO') ? 'inactivo' : ''; ?>" onclick="cambiarEstado(<?php echo $orden['id']; ?>, 'APROBADO')" title="Aprobado"><i class="bi bi-check2-circle"></i> Aprobado</button>
+                                <button class="btn-estado-tecnico btn-est-REPARADO <?php echo ($estado_actual != 'REPARADO') ? 'inactivo' : ''; ?>" onclick="cambiarEstado(<?php echo $orden['id']; ?>, 'REPARADO')" title="Reparado"><i class="bi bi-check-circle"></i> Reparado</button>
+                                <button class="btn-estado-tecnico btn-est-SIN-REPARACION <?php echo ($estado_actual != 'SIN REPARACION') ? 'inactivo' : ''; ?>" onclick="cambiarEstado(<?php echo $orden['id']; ?>, 'SIN REPARACION')" title="Sin Reparación"><i class="bi bi-x-circle"></i> Sin Reparación</button>
                             </div>
                         <?php endif; ?>
                     </td>
@@ -1232,11 +1221,11 @@ function badgeClass($estado) {
                         <div class="info-row"><span class="label">Falla:</span><span class="value"><?php echo htmlspecialchars($orden["falla"]); ?></span></div>
                     </div>
                     <div class="estado-botones" style="flex-shrink:0;display:grid;grid-template-columns:1fr 1fr;gap:2px;padding-left:4px;">
-                        <button class="btn-estado-tecnico btn-estado-revisado <?php echo ($estado_actual != 'EN REVISION') ? 'inactivo' : ''; ?>" onclick="cambiarEstado(<?php echo $orden['id']; ?>, 'EN REVISION')" style="font-size:0.65rem;padding:8px 4px;border-radius:4px;">En Revisión</button>
-                        <button class="btn-estado-tecnico btn-estado-esperando <?php echo ($estado_actual != 'EN ESPERA') ? 'inactivo' : ''; ?>" onclick="cambiarEstado(<?php echo $orden['id']; ?>, 'EN ESPERA')" style="font-size:0.65rem;padding:8px 4px;border-radius:4px;">En Espera</button>
-                        <button class="btn-estado-tecnico btn-estado-aprobado <?php echo ($estado_actual != 'APROBADO') ? 'inactivo' : ''; ?>" onclick="cambiarEstado(<?php echo $orden['id']; ?>, 'APROBADO')" style="font-size:0.65rem;padding:8px 4px;border-radius:4px;">Aprobado</button>
-                        <button class="btn-estado-tecnico btn-estado-reparado <?php echo ($estado_actual != 'REPARADO') ? 'inactivo' : ''; ?>" onclick="cambiarEstado(<?php echo $orden['id']; ?>, 'REPARADO')" style="font-size:0.65rem;padding:8px 4px;border-radius:4px;">Reparado</button>
-                        <button class="btn-estado-tecnico btn-estado-sinreparacion <?php echo ($estado_actual != 'SIN REPARACION') ? 'inactivo' : ''; ?>" onclick="cambiarEstado(<?php echo $orden['id']; ?>, 'SIN REPARACION')" style="font-size:0.65rem;padding:8px 4px;border-radius:4px;">Sin Rep.</button>
+                        <button class="btn-estado-tecnico btn-est-EN-REVISION <?php echo ($estado_actual != 'EN REVISION') ? 'inactivo' : ''; ?>" onclick="cambiarEstado(<?php echo $orden['id']; ?>, 'EN REVISION')" style="font-size:0.65rem;padding:8px 4px;border-radius:4px;">En Revisión</button>
+                        <button class="btn-estado-tecnico btn-est-EN-ESPERA <?php echo ($estado_actual != 'EN ESPERA') ? 'inactivo' : ''; ?>" onclick="cambiarEstado(<?php echo $orden['id']; ?>, 'EN ESPERA')" style="font-size:0.65rem;padding:8px 4px;border-radius:4px;">En Espera</button>
+                        <button class="btn-estado-tecnico btn-est-APROBADO <?php echo ($estado_actual != 'APROBADO') ? 'inactivo' : ''; ?>" onclick="cambiarEstado(<?php echo $orden['id']; ?>, 'APROBADO')" style="font-size:0.65rem;padding:8px 4px;border-radius:4px;">Aprobado</button>
+                        <button class="btn-estado-tecnico btn-est-REPARADO <?php echo ($estado_actual != 'REPARADO') ? 'inactivo' : ''; ?>" onclick="cambiarEstado(<?php echo $orden['id']; ?>, 'REPARADO')" style="font-size:0.65rem;padding:8px 4px;border-radius:4px;">Reparado</button>
+                        <button class="btn-estado-tecnico btn-est-SIN-REPARACION <?php echo ($estado_actual != 'SIN REPARACION') ? 'inactivo' : ''; ?>" onclick="cambiarEstado(<?php echo $orden['id']; ?>, 'SIN REPARACION')" style="font-size:0.65rem;padding:8px 4px;border-radius:4px;">Sin Rep.</button>
                     </div>
                 <?php endif; ?>
             <?php else: ?>
