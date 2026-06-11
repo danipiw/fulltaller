@@ -382,7 +382,6 @@ function badgeClass($estado) {
             $color = getEstadoColor($est);
             $cls = 'est-' . str_replace(' ', '-', $est);
             $hex = $color['bg'];
-            $fg = $color['fg'];
             echo ".$cls label { background-color: {$hex}20; border-color: {$hex}40; }\n";
             echo ".$cls input:checked + label { background-color: $hex; color: white; }\n";
             // Badge class
@@ -737,16 +736,24 @@ function badgeClass($estado) {
             $bc = getEstadoColor($est);
             echo "body.dark-mode .$bcls { background-color: {$bc['bg']}; color: white; }\n";
         endforeach; ?>
-        /* Dark mode estados (dinámico) */
+        /* Dark mode estados (dinámico) — mismos colores que modo claro */
         <?php
-        $dm_dark = ['#374151','#0e4a5a','#5a4a0e','#0e4a2e','#5a1a1a','#1f2937','#0e2a5a','#3b1a5a','#5a3a0e','#3a1a5a','#0e3a5a','#0a4a3a'];
-        $dm_color = ['#9ca3af','#67e8f9','#fde047','#6ee7b7','#fca5a5','#d1d5db','#93c5fd','#d8b4fe','#fdba74','#c4b5fd','#67e8f9','#86efac'];
-        $dm_checked_bg = ['#6b7280','#06b6d4','#eab308','#10b981','#ef4444','#4b5563','#3b82f6','#a855f7','#f97316','#8b5cf6','#06b6d4','#22c55e'];
-        foreach ($todos_estados as $i=>$est):
+        function dmHex($hex, $factor = 0.35) {
+            $hex = ltrim($hex, '#');
+            $r = hexdec(substr($hex,0,2));
+            $g = hexdec(substr($hex,2,2));
+            $b = hexdec(substr($hex,4,2));
+            $r = round($r + (255-$r)*$factor);
+            $g = round($g + (255-$g)*$factor);
+            $b = round($b + (255-$b)*$factor);
+            return sprintf('#%02x%02x%02x', $r, $g, $b);
+        }
+        foreach ($todos_estados as $est):
             $cls = 'est-' . str_replace(' ', '-', $est);
-            $di = $i % count($dm_dark);
-            echo "body.dark-mode .$cls label { background-color: {$dm_dark[$di]}; color: {$dm_color[$di]}; border-color: {$dm_dark[$di]}; }\n";
-            echo "body.dark-mode .$cls input:checked + label { background-color: {$dm_checked_bg[$di]}; color: white; }\n";
+            $color = getEstadoColor($est);
+            $hex = $color['bg'];
+            echo "body.dark-mode .$cls label { background-color: {$hex}30; color: " . dmHex($hex) . "; border-color: {$hex}50; }\n";
+            echo "body.dark-mode .$cls input:checked + label { background-color: $hex; color: white; }\n";
         endforeach;
         ?>
 
