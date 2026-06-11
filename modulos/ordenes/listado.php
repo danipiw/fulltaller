@@ -383,11 +383,11 @@ function badgeClass($estado) {
             $cls = 'est-' . str_replace(' ', '-', $est);
             $hex = $color['bg'];
             $fg = $color['fg'];
-            echo ".$cls label { background-color: {$hex}20; color: $fg; border-color: {$hex}40; }\n";
+            echo ".$cls label { background-color: {$hex}20; border-color: {$hex}40; }\n";
             echo ".$cls input:checked + label { background-color: $hex; color: white; }\n";
             // Badge class
             $bcls = 'est-badge-' . str_replace(' ', '-', $est);
-            echo ".$bcls { background-color: $hex; color: $fg; padding: 5px 10px; border-radius: 6px; font-size: 0.78rem; font-weight: 600; display: inline-block; }\n";
+            echo ".$bcls { background-color: $hex; color: white; padding: 5px 10px; border-radius: 6px; font-size: 0.78rem; font-weight: 600; display: inline-block; border: 1px solid rgba(255,255,255,0.15); }\n";
         endforeach;
         ?>
 
@@ -416,7 +416,7 @@ function badgeClass($estado) {
         <?php foreach ($todos_estados as $est):
             $bcl = 'btn-est-' . str_replace(' ', '-', $est);
             $bc = getEstadoColor($est);
-            echo ".$bcl { background: {$bc['bg']}; color: {$bc['fg']}; }\n";
+            echo ".$bcl { background: {$bc['bg']}; color: white; }\n";
         endforeach; ?>
 
         /* Dropdown estado recepción */
@@ -729,7 +729,13 @@ function badgeClass($estado) {
         <?php foreach ($todos_estados as $est):
             $bcl = 'btn-est-' . str_replace(' ', '-', $est);
             $bc = getEstadoColor($est);
-            echo "body.dark-mode .$bcl { background: {$bc['bg']} !important; color: {$bc['fg']} !important; }\n";
+            echo "body.dark-mode .$bcl { background: {$bc['bg']} !important; color: white !important; }\n";
+        endforeach; ?>
+        /* Dark mode badges */
+        <?php foreach ($todos_estados as $est):
+            $bcls = 'est-badge-' . str_replace(' ', '-', $est);
+            $bc = getEstadoColor($est);
+            echo "body.dark-mode .$bcls { background-color: {$bc['bg']}; color: white; }\n";
         endforeach; ?>
         /* Dark mode estados (dinámico) */
         <?php

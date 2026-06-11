@@ -45,8 +45,8 @@ function obtenerTodosEstados($conn) {
 function getEstadoColor($estado) {
     $mapa = [
         'INGRESADO' => ['bg' => '#6c757d', 'fg' => '#ffffff'],
-        'EN REVISION' => ['bg' => '#0dcaf0', 'fg' => '#055160'],
-        'EN ESPERA' => ['bg' => '#ffc107', 'fg' => '#664d03'],
+        'EN REVISION' => ['bg' => '#0891b2', 'fg' => '#ffffff'],
+        'EN ESPERA' => ['bg' => '#d97706', 'fg' => '#ffffff'],
         'APROBADO' => ['bg' => '#20c997', 'fg' => '#ffffff'],
         'PRESUPUESTO RECHAZADO' => ['bg' => '#dc3545', 'fg' => '#ffffff'],
         'REPARADO' => ['bg' => '#198754', 'fg' => '#ffffff'],
@@ -54,7 +54,7 @@ function getEstadoColor($estado) {
         'ENTREGADO' => ['bg' => '#0d6efd', 'fg' => '#ffffff'],
     ];
     if (isset($mapa[$estado])) return $mapa[$estado];
-    $palette = [['bg'=>'#6c757d','fg'=>'#ffffff'],['bg'=>'#0dcaf0','fg'=>'#055160'],['bg'=>'#ffc107','fg'=>'#664d03'],['bg'=>'#20c997','fg'=>'#ffffff'],['bg'=>'#dc3545','fg'=>'#ffffff'],['bg'=>'#212529','fg'=>'#ffffff'],['bg'=>'#0d6efd','fg'=>'#ffffff']];
+    $palette = [['bg'=>'#6c757d','fg'=>'#ffffff'],['bg'=>'#0891b2','fg'=>'#ffffff'],['bg'=>'#d97706','fg'=>'#ffffff'],['bg'=>'#20c997','fg'=>'#ffffff'],['bg'=>'#dc3545','fg'=>'#ffffff'],['bg'=>'#212529','fg'=>'#ffffff'],['bg'=>'#0d6efd','fg'=>'#ffffff']];
     $idx = abs(crc32($estado)) % count($palette);
     return $palette[$idx];
 }
