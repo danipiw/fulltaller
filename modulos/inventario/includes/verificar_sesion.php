@@ -12,18 +12,17 @@ if (!isset($_SESSION['rol'])) {
 
 // Verificar sesión única por usuario (token en BD)
 if (!empty($_SESSION['usuario_id'])) {
-    $stmt_tk = $conn->prepare("SELECT ultimo_session_token FROM usuarios WHERE id = ?");
-    if ($stmt_tk) {
-        $stmt_tk->bind_param("i", $_SESSION['usuario_id']);
-        $stmt_tk->execute();
-        $r_tk = $stmt_tk->get_result();
-        $row_tk = $r_tk->fetch_assoc();
-        $stmt_tk->close();
+    try {
+        $stmt_tk = $pdo->prepare("SELECT ultimo_session_token FROM usuarios WHERE id = ?");
+        $stmt_tk->execute([(int)$_SESSION['usuario_id']]);
+        $row_tk = $stmt_tk->fetch(PDO::FETCH_ASSOC);
         if (!$row_tk || $row_tk['ultimo_session_token'] !== ($_SESSION['session_token'] ?? '')) {
             session_destroy();
             header("Location: $BASE_PATH/../login.php?error=sesion");
             exit;
         }
+    } catch (PDOException $e) {
+        // Si la columna no existe aún, ignoramos
     }
 }
 
