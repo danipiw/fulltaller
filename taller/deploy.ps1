@@ -23,6 +23,11 @@ function ShouldExclude($file) {
 
 function CreateFtpDir($path) {
     if ([string]::IsNullOrEmpty($path) -or $createdDirs.ContainsKey($path)) { return }
+    # Crear padres recursivamente
+    $parent = Split-Path $path -Parent
+    if ($parent -ne '') {
+        CreateFtpDir $parent
+    }
     if ($DryRun) { Write-Host "  [DIR]  /$path"; return }
     try {
         $req = [System.Net.WebRequest]::Create("ftp://$FtpHost/$path")
