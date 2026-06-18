@@ -200,6 +200,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <button type="submit" class="btn-login">
             <i class="bi bi-box-arrow-in-right"></i> Ingresar
         </button>
+        <div style="text-align:center;margin-top:14px;">
+            <a href="solicitar_recuperacion.php" style="color:#64748b;font-size:0.82rem;text-decoration:none;">¿Olvidaste tu contraseña?</a>
+        </div>
     </form>
 
     <div class="version">FullTaller v3.0 | Multi-Taller</div>

@@ -19,6 +19,12 @@ if ($conn_taller->connect_error) {
     die('Error conectando a la BD del taller: ' . $conn_taller->connect_error);
 }
 
+// Auto-migrar columna correo
+$check_correo = $conn_taller->query("SHOW COLUMNS FROM usuarios LIKE 'correo'");
+if (!$check_correo || $check_correo->num_rows == 0) {
+    $conn_taller->query("ALTER TABLE usuarios ADD COLUMN correo VARCHAR(255) DEFAULT NULL AFTER nombre, ADD UNIQUE KEY uk_usuarios_correo (correo)");
+}
+
 $mensaje = '';
 $error = '';
 
@@ -29,6 +35,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $usuario = trim($_POST['usuario']);
         $password = $_POST['password'];
         $nombre = trim($_POST['nombre']);
+        $correo = trim($_POST['correo'] ?? '');
         $rol = $_POST['rol'];
         $modulos = [];
         if (!empty($_POST['mod_ordenes'])) $modulos[] = 'ordenes';
@@ -44,11 +51,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } else {
             $u = $conn_taller->real_escape_string($usuario);
             $n = $conn_taller->real_escape_string($nombre);
+            $c = $conn_taller->real_escape_string($correo);
             $hash = password_hash($password, PASSWORD_DEFAULT);
             $r = $conn_taller->real_escape_string($rol);
             $m = $conn_taller->real_escape_string($modulos_str);
 
-            if ($conn_taller->query("INSERT INTO usuarios (usuario, password, nombre, rol, modulos) VALUES ('$u', '$hash', '$n', '$r', '$m')")) {
+            if ($conn_taller->query("INSERT INTO usuarios (usuario, password, nombre, correo, rol, modulos) VALUES ('$u', '$hash', '$n', '$c', '$r', '$m')")) {
                 $mensaje = "Usuario <strong>" . htmlspecialchars($usuario) . "</strong> creado correctamente";
             } else {
                 $error = 'Error: ' . $conn_taller->error;
@@ -85,12 +93,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $uid = (int)$_POST['user_id'];
         $nombre = trim($_POST['nombre']);
         $usuario = trim($_POST['usuario']);
+        $correo = trim($_POST['correo'] ?? '');
         $rol = $_POST['rol'];
         if (!empty($nombre) && !empty($usuario) && !empty($rol)) {
             $n = $conn_taller->real_escape_string($nombre);
             $u = $conn_taller->real_escape_string($usuario);
+            $c = $conn_taller->real_escape_string($correo);
             $r = $conn_taller->real_escape_string($rol);
-            $conn_taller->query("UPDATE usuarios SET nombre='$n', usuario='$u', rol='$r' WHERE id=$uid");
+            $conn_taller->query("UPDATE usuarios SET nombre='$n', usuario='$u', correo='$c', rol='$r' WHERE id=$uid");
             $mensaje = 'Usuario actualizado';
         } else {
             $error = 'Todos los campos son obligatorios';
@@ -162,6 +172,10 @@ $usuarios = $conn_taller->query("SELECT * FROM usuarios ORDER BY id ASC");
                             <input type="text" class="form-control form-control-sm" name="nombre" required>
                         </div>
                         <div class="mb-2">
+                            <label class="form-label small">Correo electrónico</label>
+                            <input type="email" class="form-control form-control-sm" name="correo">
+                        </div>
+                        <div class="mb-2">
                             <label class="form-label small">Rol</label>
                             <select class="form-select form-select-sm" name="rol">
                                 <option value="cajero">Cajero</option>
@@ -204,24 +218,26 @@ $usuarios = $conn_taller->query("SELECT * FROM usuarios ORDER BY id ASC");
             <div class="col-md-7">
                 <div class="card p-0">
                     <div class="table-responsive">
-                        <table class="table table-hover mb-0">
-                            <thead>
-                                <tr>
-                                    <th>ID</th>
-                                    <th>Usuario</th>
-                                    <th>Nombre</th>
-                                    <th>Rol</th>
-                                    <th>Módulos</th>
-                                    <th>Estado</th>
-                                    <th>Acciones</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <?php while ($u = $usuarios->fetch_assoc()): ?>
-                                <tr>
-                                    <td>#<?php echo $u['id']; ?></td>
-                                    <td><code><?php echo htmlspecialchars($u['usuario']); ?></code></td>
-                                    <td><?php echo htmlspecialchars($u['nombre']); ?></td>
+                            <table class="table table-hover mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Usuario</th>
+                                        <th>Nombre</th>
+                                        <th>Correo</th>
+                                        <th>Rol</th>
+                                        <th>Módulos</th>
+                                        <th>Estado</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <?php while ($u = $usuarios->fetch_assoc()): ?>
+                                    <tr>
+                                        <td>#<?php echo $u['id']; ?></td>
+                                        <td><code><?php echo htmlspecialchars($u['usuario']); ?></code></td>
+                                        <td><?php echo htmlspecialchars($u['nombre']); ?></td>
+                                        <td><?php echo !empty($u['correo']) ? htmlspecialchars($u['correo']) : '<span class="text-muted">—</span>'; ?></td>
                                     <td><span class="badge bg-<?php echo $u['rol'] === 'tecnico' ? 'warning text-dark' : 'info'; ?>"><?php echo htmlspecialchars($u['rol']); ?></span></td>
                                     <td style="white-space:nowrap;">
                                         <?php
@@ -255,7 +271,7 @@ $usuarios = $conn_taller->query("SELECT * FROM usuarios ORDER BY id ASC");
                                             <button class="btn btn-success btn-sm" title="Activar"><i class="bi bi-play-circle"></i></button>
                                         </form>
                                         <?php endif; ?>
-                                        <button class="btn btn-outline-primary btn-sm" title="Editar usuario" onclick="editarUsuario(<?php echo $u['id']; ?>, '<?php echo htmlspecialchars($u['usuario'], ENT_QUOTES); ?>', '<?php echo htmlspecialchars($u['nombre'], ENT_QUOTES); ?>', '<?php echo htmlspecialchars($u['rol'], ENT_QUOTES); ?>')"><i class="bi bi-pencil"></i></button>
+                                        <button class="btn btn-outline-primary btn-sm" title="Editar usuario" onclick="editarUsuario(<?php echo $u['id']; ?>, '<?php echo htmlspecialchars($u['usuario'], ENT_QUOTES); ?>', '<?php echo htmlspecialchars($u['nombre'], ENT_QUOTES); ?>', '<?php echo htmlspecialchars($u['rol'], ENT_QUOTES); ?>', '<?php echo htmlspecialchars($u['correo'] ?? '', ENT_QUOTES); ?>')"><i class="bi bi-pencil"></i></button>
                                         <button class="btn btn-outline-secondary btn-sm" title="Reset pass" onclick="resetPass(<?php echo $u['id']; ?>, '<?php echo htmlspecialchars($u['usuario'], ENT_QUOTES); ?>')"><i class="bi bi-key"></i></button>
                                         <form method="POST" style="display:inline;" onsubmit="return confirm('¿Eliminar usuario <?php echo htmlspecialchars($u['usuario'], ENT_QUOTES); ?>?');">
                                             <input type="hidden" name="action" value="eliminar">
@@ -293,6 +309,10 @@ $usuarios = $conn_taller->query("SELECT * FROM usuarios ORDER BY id ASC");
                     <div class="mb-2">
                         <label class="form-label small">Nombre</label>
                         <input type="text" class="form-control form-control-sm" name="nombre" id="eu_nombre" required>
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label small">Correo electrónico</label>
+                        <input type="email" class="form-control form-control-sm" name="correo" id="eu_correo">
                     </div>
                     <div class="mb-2">
                         <label class="form-label small">Rol</label>
@@ -392,10 +412,11 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
-function editarUsuario(id, usuario, nombre, rol) {
+function editarUsuario(id, usuario, nombre, rol, correo) {
     document.getElementById('eu_user_id').value = id;
     document.getElementById('eu_usuario').value = usuario;
     document.getElementById('eu_nombre').value = nombre;
+    document.getElementById('eu_correo').value = correo || '';
     document.getElementById('eu_rol').value = rol;
     new bootstrap.Modal(document.getElementById('modalEditarUsuario')).show();
 }

@@ -36,3 +36,8 @@ modulos/pos/.ssh/
 modulos/pos/public_html/
 modulos/pos/.imunify*
 modulos/pos/.myimunify_id
+
+# Composer installer (not needed on production)
+composer.phar
+composer-setup.php
+composer-setup.php?*

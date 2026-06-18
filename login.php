@@ -197,6 +197,9 @@ if (isset($_GET['error'])) {
         <button type="submit" class="btn-login">
             <i class="bi bi-box-arrow-in-right"></i> Ingresar al Sistema
         </button>
+        <div style="text-align:center;margin-top:14px;">
+            <a href="modulos/solicitar_recuperacion.php" style="color:#64748b;font-size:0.82rem;text-decoration:none;">¿Olvidaste tu contraseña?</a>
+        </div>
     </form>
 
     <div class="version">

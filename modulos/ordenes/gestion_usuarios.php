@@ -9,6 +9,12 @@ if (!$ES_ADMIN) {
 $mensaje = '';
 $error = '';
 
+// Auto-migrar columna correo
+$check_correo = $conn->query("SHOW COLUMNS FROM usuarios LIKE 'correo'");
+if (!$check_correo || $check_correo->num_rows == 0) {
+    $conn->query("ALTER TABLE usuarios ADD COLUMN correo VARCHAR(255) DEFAULT NULL AFTER nombre, ADD UNIQUE KEY uk_usuarios_correo (correo)");
+}
+
 // Crear usuario
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
     if ($_POST['action'] === 'crear') {
@@ -16,13 +22,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
         $password = $_POST['password'];
         $nombre = trim($_POST['nombre']);
         $rol = $_POST['rol'];
+        $correo = trim($_POST['correo'] ?? '');
 
         if (empty($usuario) || empty($password) || empty($nombre)) {
             $error = 'Todos los campos son obligatorios';
         } else {
             $hash = password_hash($password, PASSWORD_DEFAULT);
-            $stmt = $conn->prepare("INSERT INTO usuarios (usuario, password, nombre, rol) VALUES (?, ?, ?, ?)");
-            $stmt->bind_param("ssss", $usuario, $hash, $nombre, $rol);
+            $stmt = $conn->prepare("INSERT INTO usuarios (usuario, password, nombre, rol, correo) VALUES (?, ?, ?, ?, ?)");
+            $stmt->bind_param("sssss", $usuario, $hash, $nombre, $rol, $correo);
             if ($stmt->execute()) {
                 $mensaje = 'Usuario creado correctamente';
             } else {
@@ -48,7 +55,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
     }
 }
 
-$usuarios = $conn->query("SELECT id, usuario, nombre, rol, activo, created_at FROM usuarios ORDER BY id");
+$usuarios = $conn->query("SELECT id, usuario, nombre, correo, rol, activo, created_at FROM usuarios ORDER BY id");
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -94,13 +101,16 @@ $usuarios = $conn->query("SELECT id, usuario, nombre, rol, activo, created_at FR
         <h5 style="margin:0 0 15px;font-size:1rem;"><i class="bi bi-person-plus"></i> Nuevo Usuario</h5>
         <form method="POST" class="row g-2">
             <input type="hidden" name="action" value="crear">
-            <div class="col-md-4">
+            <div class="col-md-3">
                 <input type="text" name="usuario" class="form-control form-control-sm" placeholder="Usuario" required>
             </div>
-            <div class="col-md-4">
+            <div class="col-md-3">
                 <input type="text" name="nombre" class="form-control form-control-sm" placeholder="Nombre completo" required>
             </div>
-            <div class="col-md-2">
+            <div class="col-md-3">
+                <input type="email" name="correo" class="form-control form-control-sm" placeholder="Correo electrónico">
+            </div>
+            <div class="col-md-1">
                 <select name="rol" class="form-select form-select-sm" required>
                     <option value="recepcion">Recepción</option>
                     <option value="tecnico">Técnico</option>
@@ -122,6 +132,9 @@ $usuarios = $conn->query("SELECT id, usuario, nombre, rol, activo, created_at FR
         <div>
             <strong style="font-size:1rem;"><?php echo htmlspecialchars($u['nombre']); ?></strong>
             <span class="text-muted" style="font-size:0.85rem;"> (@<?php echo htmlspecialchars($u['usuario']); ?>)</span>
+            <?php if (!empty($u['correo'])): ?>
+            <br><span class="text-muted" style="font-size:0.8rem;"><i class="bi bi-envelope"></i> <?php echo htmlspecialchars($u['correo']); ?></span>
+            <?php endif; ?>
             <span class="badge-rol badge-<?php echo htmlspecialchars($u['rol']); ?>"><?php echo htmlspecialchars(ucfirst($u['rol'])); ?></span>
             <?php if (!$u['activo']): ?>
             <span class="badge bg-secondary">Inactivo</span>
